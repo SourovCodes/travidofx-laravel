@@ -1,15 +1,18 @@
-name: Deploy to Production
+name: Build Production Release
 
 on:
   push:
     branches: [main]
+  workflow_dispatch:
 
-concurrency: production_environment
+permissions:
+  contents: write
+
+concurrency: production_release
 
 jobs:
-  deploy:
+  build-release:
     runs-on: ubuntu-latest
-    environment: production
 
     steps:
       - name: Checkout code
@@ -22,16 +25,8 @@ jobs:
           extensions: mbstring, xml, ctype, iconv, intl, dom, filter, gd, json, pdo, pdo_mysql, pdo_sqlite, sqlite3
           tools: composer:v2
 
-      - name: Cache Composer packages
-        uses: actions/cache@v4
-        with:
-          path: vendor
-          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-php-
-
-      - name: Install Composer dependencies
-        run: composer install --prefer-dist --no-progress --no-interaction --no-dev --optimize-autoloader
+      - name: Install production Composer dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction --no-dev --optimize-autoloader --classmap-authoritative
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -42,21 +37,59 @@ jobs:
       - name: Install npm dependencies
         run: npm ci
 
-      - name: Build assets
+      - name: Build production assets
         run: npm run build
 
-      - name: Deploy to Production
-        uses: deployphp/action@v1
+      - name: Prepare production zip
+        run: |
+          RELEASE_DIR="release/travidofx"
+          ZIP_NAME="tradivofx-production-${GITHUB_RUN_ID}.zip"
+
+          rm -rf release "$ZIP_NAME"
+          mkdir -p "$RELEASE_DIR"
+
+          rsync -a ./ "$RELEASE_DIR/" \
+            --exclude=".git" \
+            --exclude=".github" \
+            --exclude=".claude" \
+            --exclude=".codex" \
+            --exclude=".cursor" \
+            --exclude=".fleet" \
+            --exclude=".idea" \
+            --exclude=".nova" \
+            --exclude=".vscode" \
+            --exclude=".zed" \
+            --exclude="node_modules" \
+            --exclude="release" \
+            --exclude="tests" \
+            --exclude="storage/logs/*" \
+            --exclude="storage/framework/cache/data/*" \
+            --exclude="storage/framework/sessions/*" \
+            --exclude="storage/framework/testing/*" \
+            --exclude="storage/framework/views/*" \
+            --exclude="Archive.zip" \
+            --exclude="*.zip"
+
+          find "$RELEASE_DIR" -name ".env*" -type f -delete
+          find "$RELEASE_DIR" -name ".phpunit.result.cache" -type f -delete
+          find "$RELEASE_DIR" -name ".DS_Store" -type f -delete
+
+          cd "$RELEASE_DIR"
+          zip -qr "../../$ZIP_NAME" .
+
+          echo "ZIP_NAME=$ZIP_NAME" >> "$GITHUB_ENV"
+
+      - name: Upload production artifact
+        uses: actions/upload-artifact@v4
         with:
-          private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-          dep: deploy
-          deployer-version: '8.0.5'
-        env:
-          DEPLOY_REPOSITORY: ${{ vars.DEPLOY_REPOSITORY }}
-          DEPLOY_HOSTNAME: ${{ vars.DEPLOY_HOSTNAME }}
-          DEPLOY_REMOTE_USER: ${{ vars.DEPLOY_REMOTE_USER }}
-          DEPLOY_PATH: ${{ vars.DEPLOY_PATH }}
-          DEPLOY_HTTP_USER: ${{ vars.DEPLOY_HTTP_USER }}
-          DEPLOY_SSH_PORT: ${{ vars.DEPLOY_SSH_PORT }}
-          DEPLOY_BRANCH: main
-          DEPLOY_PHP_BINARY: ${{ vars.DEPLOY_PHP_BINARY }}
+          name: production-release
+          path: ${{ env.ZIP_NAME }}
+          if-no-files-found: error
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: production-${{ github.run_id }}
+          name: Production Build ${{ github.run_number }}
+          files: ${{ env.ZIP_NAME }}
+          make_latest: true
