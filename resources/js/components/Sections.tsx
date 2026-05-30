@@ -261,7 +261,7 @@ export function Results() {
                     title="Tradivo Magic EA V12 — Aggressive Mode"
                     body="Designed for high-profit performance — stronger lot scaling, up to 50% monthly returns with faster basket cycles."
                     img="/img/v10-agreesive.png"
-                    href="https://www.myfxbook.com/members/Tradivorobot/tradivo-magic-ea-v1011/12044531"
+                    href="https://www.myfxbook.com/members/Tradivorobot/tradivo-magic-ea/12044405"
                 />
             </div>
         </section>
