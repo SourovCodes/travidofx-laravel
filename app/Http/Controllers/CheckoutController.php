@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Order;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -46,6 +47,8 @@ class CheckoutController extends Controller
             ? sprintf('%d%%', $feePercent)
             : sprintf('%.2f%%', $feePercent);
 
+        $totalCents = (int) round($total * 100);
+
         $session = Cashier::stripe()->checkout->sessions->create([
             'mode' => 'payment',
             'payment_method_types' => ['card'],
@@ -54,7 +57,7 @@ class CheckoutController extends Controller
                 'quantity' => 1,
                 'price_data' => [
                     'currency' => 'usd',
-                    'unit_amount' => (int) round($total * 100),
+                    'unit_amount' => $totalCents,
                     'product_data' => [
                         'name' => $plan['name'],
                         'description' => "{$plan['subtitle']} · Includes {$feeLabel} card payment fee",
@@ -75,6 +78,21 @@ class CheckoutController extends Controller
                 'country' => $data['country'],
                 'additionalInfo' => substr($data['additionalInfo'] ?? '', 0, 500),
             ],
+        ]);
+
+        Order::create([
+            'stripe_session_id' => $session->id,
+            'email' => $data['email'],
+            'first_name' => $data['firstName'],
+            'last_name' => $data['lastName'],
+            'country' => $data['country'],
+            'plan_slug' => $planSlug,
+            'plan_name' => $plan['name'],
+            'amount_cents' => $totalCents,
+            'currency' => 'usd',
+            'status' => Order::STATUS_PENDING,
+            'payment_method' => $data['paymentMethod'] ?? 'stripe',
+            'additional_info' => $data['additionalInfo'] ?? null,
         ]);
 
         return redirect($session->url, 303);
