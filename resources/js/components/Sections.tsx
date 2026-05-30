@@ -1,3 +1,4 @@
+import { Link } from '@inertiajs/react';
 import ContactForm from '@/components/ContactForm';
 import Reveal from '@/components/Reveal';
 
@@ -647,9 +648,9 @@ export function Testimonials({ reviews }: { reviews: Review[] }) {
                             accounts.
                         </p>
                         <div className="mt-7 flex justify-center">
-                            <a href="/reviews" className="btn-outline-white">
+                            <Link href="/reviews" className="btn-outline-white">
                                 Write a Review --&gt;
-                            </a>
+                            </Link>
                         </div>
                     </div>
                 </Reveal>
