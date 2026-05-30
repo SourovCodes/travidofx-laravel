@@ -1,7 +1,7 @@
+import { Head, Link } from '@inertiajs/react';
 import FloatingWhatsApp from '@/components/FloatingWhatsApp';
 import Footer from '@/components/Footer';
 import Header from '@/components/Header';
-import { Head, Link } from '@inertiajs/react';
 
 export default function CheckoutCancel() {
     return (
@@ -32,11 +32,13 @@ export default function CheckoutCancel() {
                             </svg>
                         </div>
                         <p className="eyebrow">Payment Canceled</p>
-                        <h1 className="section-title mt-3">No charge was made</h1>
+                        <h1 className="section-title mt-3">
+                            No charge was made
+                        </h1>
                         <p className="section-subtitle mx-auto mt-4">
-                            You canceled the checkout. Your card was not charged. Try again
-                            when you&apos;re ready — your spot in the launch discount is
-                            still open.
+                            You canceled the checkout. Your card was not
+                            charged. Try again when you&apos;re ready — your
+                            spot in the launch discount is still open.
                         </p>
                         <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
                             <Link href="/#prices" className="btn-elementor">

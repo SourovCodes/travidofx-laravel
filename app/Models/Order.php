@@ -21,6 +21,8 @@ class Order extends Model
         'country',
         'plan_slug',
         'plan_name',
+        'coupon_code',
+        'coupon_discount_cents',
         'amount_cents',
         'currency',
         'status',
@@ -32,6 +34,7 @@ class Order extends Model
     {
         return [
             'amount_cents' => 'integer',
+            'coupon_discount_cents' => 'integer',
         ];
     }
 

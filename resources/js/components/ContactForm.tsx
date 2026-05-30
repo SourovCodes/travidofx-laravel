@@ -1,5 +1,5 @@
 import { useForm } from '@inertiajs/react';
-import { FormEvent } from 'react';
+import type { FormEvent } from 'react';
 
 type FormData = {
     name: string;
@@ -9,13 +9,20 @@ type FormData = {
 };
 
 export default function ContactForm() {
-    const { data, setData, post, processing, errors, recentlySuccessful, reset } =
-        useForm<FormData>({
-            name: '',
-            email: '',
-            message: '',
-            website: '',
-        });
+    const {
+        data,
+        setData,
+        post,
+        processing,
+        errors,
+        recentlySuccessful,
+        reset,
+    } = useForm<FormData>({
+        name: '',
+        email: '',
+        message: '',
+        website: '',
+    });
 
     const submit = (e: FormEvent) => {
         e.preventDefault();
@@ -103,9 +110,9 @@ function Field({
 
     return (
         <label className="block">
-            <span className="font-display mb-2 block text-xs font-semibold tracking-widest text-white/60 uppercase">
+            <span className="mb-2 block font-display text-xs font-semibold tracking-widest text-white/60 uppercase">
                 {label}
-                <span className="text-shape ml-0.5">*</span>
+                <span className="ml-0.5 text-shape">*</span>
             </span>
             {type === 'textarea' ? (
                 <textarea

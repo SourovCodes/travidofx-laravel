@@ -16,7 +16,11 @@ export function TiltBand({ height = TILT_DEFAULT_H }: { height?: number }) {
                 xmlns="http://www.w3.org/2000/svg"
             >
                 <path d="M0 0L2600 0 2600 69.1 0 0z" fill={FILL} />
-                <path d="M0 0L2600 0 2600 69.1 0 69.1z" fill={FILL} opacity="0.5" />
+                <path
+                    d="M0 0L2600 0 2600 69.1 0 69.1z"
+                    fill={FILL}
+                    opacity="0.5"
+                />
                 <path
                     d="M2600 0L0 0 0 130.1 2600 69.1z"
                     fill={FILL}

@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Coupon;
 use App\Models\Order;
+use App\Models\Setting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -19,7 +21,7 @@ class CheckoutController extends Controller
         return Inertia::render('checkout/index', [
             'planSlug' => $planSlug,
             'plan' => $plan,
-            'paymentFeeRate' => (float) config('plans.fee_rate'),
+            'paymentFeeRate' => Setting::getFloat(Setting::PAYMENT_FEE_RATE, (float) config('plans.fee_rate')),
         ]);
     }
 
@@ -33,21 +35,35 @@ class CheckoutController extends Controller
             'country' => ['required', 'string', 'max:80'],
             'additionalInfo' => ['nullable', 'string', 'max:500'],
             'paymentMethod' => ['nullable', 'string', 'max:20'],
+            'promoCode' => ['nullable', 'string', 'max:50'],
         ]);
 
         $planSlug = $this->resolvePlan($data['plan']);
         $plan = config("plans.lookup.{$planSlug}");
-        $feeRate = (float) config('plans.fee_rate');
+        $feeRate = Setting::getFloat(Setting::PAYMENT_FEE_RATE, (float) config('plans.fee_rate'));
 
         $base = (float) $plan['amount'];
-        $fee = round($base * $feeRate, 2);
-        $total = round($base + $fee, 2);
+        $couponCode = trim((string) ($data['promoCode'] ?? ''));
+        $coupon = $this->resolveCoupon($couponCode);
+
+        if ($couponCode !== '' && ! $coupon) {
+            return back()->withErrors([
+                'promoCode' => 'Coupon code is not valid.',
+            ])->withInput();
+        }
+
+        $couponDiscount = $coupon ? $coupon->calculateDiscount($base) : 0;
+        $discounted = max(0, round($base - $couponDiscount, 2));
+
+        $fee = round($discounted * $feeRate, 2);
+        $total = round($discounted + $fee, 2);
         $feePercent = $feeRate * 100;
         $feeLabel = floor($feePercent) === $feePercent
             ? sprintf('%d%%', $feePercent)
             : sprintf('%.2f%%', $feePercent);
 
         $totalCents = (int) round($total * 100);
+        $couponDiscountCents = (int) round($couponDiscount * 100);
 
         $session = Cashier::stripe()->checkout->sessions->create([
             'mode' => 'payment',
@@ -70,6 +86,8 @@ class CheckoutController extends Controller
                 'plan' => $planSlug,
                 'paymentMethod' => $data['paymentMethod'] ?? 'stripe',
                 'baseAmount' => number_format($base, 2, '.', ''),
+                'couponCode' => $coupon?->code ?? '',
+                'couponDiscount' => number_format($couponDiscount, 2, '.', ''),
                 'paymentFee' => number_format($fee, 2, '.', ''),
                 'paymentFeeRate' => number_format($feeRate, 4, '.', ''),
                 'totalAmount' => number_format($total, 2, '.', ''),
@@ -88,6 +106,8 @@ class CheckoutController extends Controller
             'country' => $data['country'],
             'plan_slug' => $planSlug,
             'plan_name' => $plan['name'],
+            'coupon_code' => $coupon?->code,
+            'coupon_discount_cents' => $couponDiscountCents,
             'amount_cents' => $totalCents,
             'currency' => 'usd',
             'status' => Order::STATUS_PENDING,
@@ -115,5 +135,18 @@ class CheckoutController extends Controller
         $lookup = config('plans.lookup');
 
         return $slug && array_key_exists($slug, $lookup) ? $slug : 'pro';
+    }
+
+    private function resolveCoupon(?string $code): ?Coupon
+    {
+        $code = $code ? trim($code) : '';
+
+        if ($code === '') {
+            return null;
+        }
+
+        return Coupon::active()
+            ->whereRaw('UPPER(code) = ?', [strtoupper($code)])
+            ->first();
     }
 }

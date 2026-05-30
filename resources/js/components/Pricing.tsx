@@ -19,7 +19,12 @@ const PLANS: Plan[] = [
         priceNow: 149,
         priceOld: 199,
         blurb: '3 Months License',
-        features: ['1 Key License', 'XAUUSD Support', 'Help & Support', 'Free Updates'],
+        features: [
+            '1 Key License',
+            'XAUUSD Support',
+            'Help & Support',
+            'Free Updates',
+        ],
         cta: { label: 'Get it Now', href: '/checkout?plan=basic' },
     },
     {
@@ -83,8 +88,8 @@ export default function Pricing() {
                 </div>
 
                 <p className="mx-auto mt-10 max-w-2xl text-center text-[14px] text-white/75">
-                    📩 For Unlimited License (for business or affiliate purposes), please
-                    contact us via private message.
+                    📩 For Unlimited License (for business or affiliate
+                    purposes), please contact us via private message.
                 </p>
             </div>
         </section>
@@ -93,7 +98,7 @@ export default function Pricing() {
 
 function PlanCard({ plan }: { plan: Plan }) {
     return (
-        <div className="bg-card relative overflow-hidden rounded-sm shadow-[0_22px_50px_-25px_rgba(0,0,0,0.65)]">
+        <div className="relative overflow-hidden rounded-sm bg-card shadow-[0_22px_50px_-25px_rgba(0,0,0,0.65)]">
             {plan.ribbon && (
                 <div
                     className="pointer-events-none absolute top-0 right-0 z-10 h-[150px] w-[150px] overflow-hidden"
@@ -101,7 +106,7 @@ function PlanCard({ plan }: { plan: Plan }) {
                     aria-hidden
                 >
                     <div
-                        className="font-display text-center text-[13px] font-extrabold tracking-[0.18em] text-white uppercase"
+                        className="text-center font-display text-[13px] font-extrabold tracking-[0.18em] text-white uppercase"
                         style={{
                             width: '200%',
                             marginTop: 35,
@@ -109,7 +114,9 @@ function PlanCard({ plan }: { plan: Plan }) {
                             transform:
                                 'translateY(-50%) translateX(-50%) translateX(35px) rotate(-45deg)',
                             background:
-                                plan.ribbon.tone === 'popular' ? '#003D08' : '#AE8348',
+                                plan.ribbon.tone === 'popular'
+                                    ? '#003D08'
+                                    : '#AE8348',
                         }}
                     >
                         {plan.ribbon.label}
@@ -121,19 +128,21 @@ function PlanCard({ plan }: { plan: Plan }) {
                 <h3 className="font-display text-[24px] leading-tight font-semibold text-[#F5EDED]">
                     {plan.name}
                 </h3>
-                <p className="mt-1 text-[13px] text-white/85">{plan.subtitle}</p>
+                <p className="mt-1 text-[13px] text-white/85">
+                    {plan.subtitle}
+                </p>
             </div>
 
             <div className="px-5 pt-10 pb-6 text-center text-white">
                 <div className="flex flex-wrap items-center justify-center gap-x-3 leading-none">
                     {plan.priceOld && (
-                        <span className="font-display mb-2 self-end text-[1.05rem] font-normal text-white/70 line-through">
+                        <span className="mb-2 self-end font-display text-[1.05rem] font-normal text-white/70 line-through">
                             <span className="mr-px">$</span>
                             {plan.priceOld}
                         </span>
                     )}
                     <span className="inline-flex items-baseline">
-                        <span className="font-display mr-0.5 text-[28px] font-extrabold">
+                        <span className="mr-0.5 font-display text-[28px] font-extrabold">
                             $
                         </span>
                         <span className="font-display text-[65px] leading-[0.8] font-extrabold">
@@ -152,7 +161,10 @@ function PlanCard({ plan }: { plan: Plan }) {
                         style={
                             i === 0
                                 ? undefined
-                                : { borderTop: '1px solid rgba(255,255,255,0.08)' }
+                                : {
+                                      borderTop:
+                                          '1px solid rgba(255,255,255,0.08)',
+                                  }
                         }
                     >
                         <div className="flex items-center gap-3 px-4">
@@ -161,7 +173,7 @@ function PlanCard({ plan }: { plan: Plan }) {
                                 height="18"
                                 viewBox="0 0 512 512"
                                 fill="currentColor"
-                                className="text-shape shrink-0"
+                                className="shrink-0 text-shape"
                                 aria-hidden
                             >
                                 <path d="M256 8C119.033 8 8 119.033 8 256s111.033 248 248 248 248-111.033 248-248S392.967 8 256 8zm0 48c110.532 0 200 89.451 200 200 0 110.532-89.451 200-200 200-110.532 0-200-89.451-200-200 0-110.532 89.451-200 200-200m140.204 130.267l-22.536-22.718c-4.667-4.705-12.265-4.736-16.97-.068L215.346 303.697l-59.792-60.277c-4.667-4.705-12.265-4.736-16.97-.069l-22.719 22.536c-4.705 4.667-4.736 12.265-.068 16.971l90.781 91.516c4.667 4.705 12.265 4.736 16.97.068l172.589-171.204c4.704-4.668 4.734-12.266.067-16.971z" />

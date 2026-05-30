@@ -20,6 +20,7 @@ export default function Header() {
         const onScroll = () => setScrolled(window.scrollY > 60);
         onScroll();
         window.addEventListener('scroll', onScroll, { passive: true });
+
         return () => window.removeEventListener('scroll', onScroll);
     }, []);
 
@@ -33,7 +34,11 @@ export default function Header() {
             style={{ minHeight: 'var(--header-h)' }}
         >
             <div className="container-x flex items-center justify-between gap-6 py-3.5">
-                <Link href="/" className="flex items-center" aria-label="Tradivo home">
+                <Link
+                    href="/"
+                    className="flex items-center"
+                    aria-label="Tradivo home"
+                >
                     <img
                         src="/img/logo.png"
                         alt="Tradivo Magic EA V12"
@@ -48,7 +53,7 @@ export default function Header() {
                         <a
                             key={item.href}
                             href={hrefFor(item.href)}
-                            className="font-display hover:text-shape text-[15px] font-medium text-white/95 transition-colors"
+                            className="font-display text-[15px] font-medium text-white/95 transition-colors hover:text-shape"
                         >
                             {item.label}
                         </a>
@@ -76,7 +81,10 @@ export default function Header() {
                             strokeWidth="2"
                         >
                             {open ? (
-                                <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round" />
+                                <path
+                                    d="M6 6l12 12M18 6L6 18"
+                                    strokeLinecap="round"
+                                />
                             ) : (
                                 <>
                                     <path d="M4 7h16" strokeLinecap="round" />
@@ -97,7 +105,7 @@ export default function Header() {
                                 key={item.href}
                                 href={hrefFor(item.href)}
                                 onClick={() => setOpen(false)}
-                                className="font-display rounded-md px-2 py-3 text-[15px] font-medium text-white/90 hover:bg-white/5"
+                                className="rounded-md px-2 py-3 font-display text-[15px] font-medium text-white/90 hover:bg-white/5"
                             >
                                 {item.label}
                             </a>

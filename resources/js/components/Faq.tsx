@@ -63,27 +63,41 @@ export default function Faq() {
             <div className="container-x">
                 <Reveal>
                     <div className="mx-auto mb-12 max-w-2xl text-center">
-                        <h2 className="section-title">Frequently Asked Question</h2>
+                        <h2 className="section-title">
+                            Frequently Asked Question
+                        </h2>
                     </div>
                 </Reveal>
 
                 <div className="grid gap-x-8 gap-y-3 md:grid-cols-2">
                     <FaqColumn items={ITEMS_LEFT} startIndex={0} />
-                    <FaqColumn items={ITEMS_RIGHT} startIndex={ITEMS_LEFT.length} />
+                    <FaqColumn
+                        items={ITEMS_RIGHT}
+                        startIndex={ITEMS_LEFT.length}
+                    />
                 </div>
             </div>
         </section>
     );
 }
 
-function FaqColumn({ items, startIndex }: { items: Item[]; startIndex: number }) {
-    const [open, setOpen] = useState<number | null>(startIndex === 0 ? 0 : null);
+function FaqColumn({
+    items,
+    startIndex,
+}: {
+    items: Item[];
+    startIndex: number;
+}) {
+    const [open, setOpen] = useState<number | null>(
+        startIndex === 0 ? 0 : null,
+    );
 
     return (
         <div className="space-y-3">
             {items.map((item, i) => {
                 const idx = startIndex + i;
                 const isOpen = open === idx;
+
                 return (
                     <Reveal key={item.q} delay={i * 50}>
                         <div className="border-b border-white/10 transition-colors">
@@ -98,7 +112,7 @@ function FaqColumn({ items, startIndex }: { items: Item[]; startIndex: number })
                                 <span
                                     className={`inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-base font-bold transition-all ${
                                         isOpen
-                                            ? 'bg-gold text-bg rotate-180'
+                                            ? 'rotate-180 bg-gold text-bg'
                                             : 'bg-white/8 text-white/80'
                                     }`}
                                     aria-hidden

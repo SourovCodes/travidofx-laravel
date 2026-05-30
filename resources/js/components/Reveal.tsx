@@ -20,7 +20,11 @@ export default function Reveal({
 
     useEffect(() => {
         const el = ref.current;
-        if (!el) return;
+
+        if (!el) {
+            return;
+        }
+
         const io = new IntersectionObserver(
             ([e]) => {
                 if (e.isIntersecting) {
@@ -31,6 +35,7 @@ export default function Reveal({
             { rootMargin: '0px 0px -10% 0px', threshold: 0.05 },
         );
         io.observe(el);
+
         return () => io.disconnect();
     }, []);
 

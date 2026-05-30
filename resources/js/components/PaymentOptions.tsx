@@ -5,8 +5,8 @@ import {
     getExtraFee,
     getTotalWithFee,
     hasExtraFee,
-    type PaymentMethod,
 } from '@/lib/payment-fees';
+import type { PaymentMethod } from '@/lib/payment-fees';
 
 const WHATSAPP_NUMBER = '14075617294';
 
@@ -88,7 +88,7 @@ export default function PaymentOptions({
                 title="Credit / Debit Card"
                 subtitle={`${feePercentLabel} processing fee applies`}
                 trailing={
-                    <span className="font-display hidden gap-1.5 text-[10px] font-bold tracking-widest uppercase sm:inline-flex">
+                    <span className="hidden gap-1.5 font-display text-[10px] font-bold tracking-widest uppercase sm:inline-flex">
                         <span className="rounded bg-[#1A1F71] px-2 py-1 text-white">
                             Visa
                         </span>
@@ -109,7 +109,7 @@ export default function PaymentOptions({
                 title="Crypto"
                 subtitle="USDT (BEP20 / TRC20), BTC, LTC"
                 trailing={
-                    <span className="font-display text-shape text-[11px] font-bold tracking-widest uppercase">
+                    <span className="font-display text-[11px] font-bold tracking-widest text-shape uppercase">
                         4 networks
                     </span>
                 }
@@ -125,7 +125,7 @@ export default function PaymentOptions({
                                     className={`rounded-lg border px-3 py-2.5 text-left transition-colors ${
                                         coin === c.key
                                             ? 'border-shape bg-shape/10'
-                                            : 'hover:border-shape/40 border-white/10 bg-white/[0.03]'
+                                            : 'border-white/10 bg-white/[0.03] hover:border-shape/40'
                                     }`}
                                 >
                                     <div className="font-display text-sm font-bold text-white">
@@ -147,13 +147,13 @@ export default function PaymentOptions({
                                     ${amount} in {activeCoin.asset}
                                 </span>
                             </div>
-                            <div className="font-display mt-2 text-[11px] font-bold tracking-widest text-white/60 uppercase">
+                            <div className="mt-2 font-display text-[11px] font-bold tracking-widest text-white/60 uppercase">
                                 {activeCoin.network} address
                             </div>
                             <AddressRow address={activeCoin.address} />
                             <p className="mt-3 text-[12px] leading-relaxed text-white/65">
-                                After sending, share the transaction hash on WhatsApp so we
-                                can activate your license.
+                                After sending, share the transaction hash on
+                                WhatsApp so we can activate your license.
                             </p>
                         </div>
 
@@ -211,8 +211,10 @@ export default function PaymentOptions({
                         </span>
                     </div>
                     <div className="mt-1 flex justify-between gap-4 text-white">
-                        <span className="font-display font-bold">Payable total</span>
-                        <span className="font-display text-shape font-extrabold">
+                        <span className="font-display font-bold">
+                            Payable total
+                        </span>
+                        <span className="font-display font-extrabold text-shape">
                             ${formatMoney(total)}
                         </span>
                     </div>
@@ -222,8 +224,8 @@ export default function PaymentOptions({
             {method === 'stripe' && (
                 <>
                     <p className="pt-2 text-xs leading-relaxed text-white/60">
-                        Your card payment is securely processed by Stripe. We never see or
-                        store card details.
+                        Your card payment is securely processed by Stripe. We
+                        never see or store card details.
                     </p>
                     <div className="mt-3 flex items-start gap-3 rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-3">
                         <svg
@@ -282,6 +284,7 @@ function MethodRow({
     children?: React.ReactNode;
 }) {
     const active = method === value;
+
     return (
         <div
             className={`rounded-xl border transition-colors ${
@@ -300,7 +303,7 @@ function MethodRow({
                     className="accent-shape"
                 />
                 <span className="min-w-0 flex-1">
-                    <span className="font-display block font-semibold text-white">
+                    <span className="block font-display font-semibold text-white">
                         {title}
                     </span>
                     {subtitle && (
@@ -327,6 +330,7 @@ function AddressRow({ address }: { address: string }) {
             /* clipboard unavailable */
         }
     };
+
     return (
         <div className="mt-1 flex items-center gap-2 rounded-md border border-white/10 bg-black/40 px-3 py-2">
             <code className="flex-1 truncate font-mono text-[12px] text-white">
@@ -335,7 +339,7 @@ function AddressRow({ address }: { address: string }) {
             <button
                 type="button"
                 onClick={copy}
-                className="font-display text-shape shrink-0 text-[11px] font-bold tracking-widest uppercase hover:opacity-80"
+                className="shrink-0 font-display text-[11px] font-bold tracking-widest text-shape uppercase hover:opacity-80"
             >
                 {copied ? 'Copied' : 'Copy'}
             </button>
@@ -362,7 +366,13 @@ function ContactBlock({ message, note }: { message: string; note: string }) {
 
 function WhatsAppIcon() {
     return (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+        <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden
+        >
             <path d="M20.52 3.48A11.83 11.83 0 0 0 12.04 0C5.46 0 .1 5.36.1 11.94c0 2.1.55 4.15 1.6 5.96L0 24l6.27-1.64a11.9 11.9 0 0 0 5.77 1.47h.01c6.58 0 11.94-5.36 11.94-11.94 0-3.19-1.24-6.19-3.47-8.41Zm-8.48 18.36h-.01a9.89 9.89 0 0 1-5.04-1.38l-.36-.21-3.72.98 1-3.62-.24-.37a9.86 9.86 0 0 1-1.51-5.3c0-5.47 4.45-9.92 9.92-9.92 2.65 0 5.14 1.04 7.01 2.9a9.86 9.86 0 0 1 2.9 7.02c0 5.47-4.45 9.9-9.95 9.9Zm5.43-7.42c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.66.15-.2.3-.76.97-.93 1.17-.17.2-.34.22-.64.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.34.45-.51.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.66-1.6-.91-2.18-.24-.57-.48-.5-.66-.5l-.56-.01c-.2 0-.52.07-.79.37-.27.3-1.04 1.01-1.04 2.47 0 1.46 1.07 2.87 1.22 3.07.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.63.71.22 1.36.19 1.87.12.57-.09 1.76-.72 2.01-1.41.25-.7.25-1.29.17-1.41-.07-.13-.27-.2-.57-.35Z" />
         </svg>
     );

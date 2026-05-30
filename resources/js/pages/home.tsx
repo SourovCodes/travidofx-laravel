@@ -1,3 +1,4 @@
+import { Head } from '@inertiajs/react';
 import Faq from '@/components/Faq';
 import FloatingWhatsApp from '@/components/FloatingWhatsApp';
 import Footer from '@/components/Footer';
@@ -13,13 +14,12 @@ import {
     PricingBanner,
     Results,
     ResultsHeader,
-    type Review,
     SuccessKeys,
     Testimonials,
     WhyChoose,
 } from '@/components/Sections';
+import type { Review } from '@/components/Sections';
 import { FanBand, TiltBand } from '@/components/Shape';
-import { Head } from '@inertiajs/react';
 
 type Props = {
     reviews: Review[];

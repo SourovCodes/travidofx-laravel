@@ -39,7 +39,7 @@ export function SuccessKeys() {
         <section className="relative overflow-hidden bg-black py-16 md:py-20">
             <div className="container-x">
                 <Reveal>
-                    <h3 className="font-display text-center text-[1.7rem] font-medium text-white md:text-[2rem]">
+                    <h3 className="text-center font-display text-[1.7rem] font-medium text-white md:text-[2rem]">
                         Success Keys
                     </h3>
                 </Reveal>
@@ -58,10 +58,13 @@ export function SuccessKeys() {
                                     className="min-w-[180px] shrink-0 basis-[calc((100%-3*24px)/4)]"
                                     style={{ scrollSnapAlign: 'start' }}
                                 >
-                                    <div className="bg-card aspect-[300/199] overflow-hidden rounded border border-white/[0.06]">
+                                    <div className="aspect-[300/199] overflow-hidden rounded border border-white/[0.06] bg-card">
                                         <img
                                             src={item.src}
-                                            alt={item.title ?? `Success key ${i + 1}`}
+                                            alt={
+                                                item.title ??
+                                                `Success key ${i + 1}`
+                                            }
                                             width={300}
                                             height={199}
                                             className="h-full w-full object-cover"
@@ -97,7 +100,7 @@ export function Description() {
         >
             <div className="container-x grid items-center gap-12 lg:grid-cols-2">
                 <Reveal>
-                    <h6 className="font-display text-shape text-[clamp(1rem,0.7vw+.6rem,1.15rem)] leading-tight font-bold tracking-[0.18em] uppercase">
+                    <h6 className="font-display text-[clamp(1rem,0.7vw+.6rem,1.15rem)] leading-tight font-bold tracking-[0.18em] text-shape uppercase">
                         Tradivo Magic EA V12
                         <br />
                         Advanced Gold &amp; BTC Expert Advisor MT5
@@ -105,29 +108,44 @@ export function Description() {
 
                     <div className="mt-7 space-y-5 text-[15px] leading-[1.75] text-white/85">
                         <p>
-                            A powerful multi-asset Expert Advisor built for XAUUSD &amp;
-                            BTCUSD traders who want intelligent automation, controlled
-                            recovery logic, and stable basket management.
+                            A powerful multi-asset Expert Advisor built for
+                            XAUUSD &amp; BTCUSD traders who want intelligent
+                            automation, controlled recovery logic, and stable
+                            basket management.
                         </p>
                         <p>
-                            Tradivo Magic EA V12 combines HTF trend filtering, counter-trend
-                            grid execution, recovery protection, and smart basket profit
-                            targeting into one complete automated trading system.
+                            Tradivo Magic EA V12 combines HTF trend filtering,
+                            counter-trend grid execution, recovery protection,
+                            and smart basket profit targeting into one complete
+                            automated trading system.
                         </p>
-                        <p className="pt-1 font-bold text-white">Included Trading Modes:</p>
+                        <p className="pt-1 font-bold text-white">
+                            Included Trading Modes:
+                        </p>
                         <ul className="space-y-1.5">
                             <li>
-                                - <strong className="text-white">Balanced Mode</strong> —
-                                stable growth with controlled recovery and moderate drawdown.
+                                -{' '}
+                                <strong className="text-white">
+                                    Balanced Mode
+                                </strong>{' '}
+                                — stable growth with controlled recovery and
+                                moderate drawdown.
                             </li>
                             <li>
-                                - <strong className="text-white">Aggressive Mode</strong> —
-                                faster basket cycles with higher profit potential and
-                                increased risk.
+                                -{' '}
+                                <strong className="text-white">
+                                    Aggressive Mode
+                                </strong>{' '}
+                                — faster basket cycles with higher profit
+                                potential and increased risk.
                             </li>
                             <li>
-                                - <strong className="text-white">Cent Account Mode</strong> —
-                                optimized settings for small balances and USC accounts.
+                                -{' '}
+                                <strong className="text-white">
+                                    Cent Account Mode
+                                </strong>{' '}
+                                — optimized settings for small balances and USC
+                                accounts.
                             </li>
                         </ul>
 
@@ -153,8 +171,13 @@ export function Description() {
                                     'Installation guide & setup support',
                                     'VPS-friendly 24/7 automation',
                                 ].map((f) => (
-                                    <li key={f} className="flex items-start gap-2.5">
-                                        <span className="mt-0.5 text-[#3ad072]">✅</span>
+                                    <li
+                                        key={f}
+                                        className="flex items-start gap-2.5"
+                                    >
+                                        <span className="mt-0.5 text-[#3ad072]">
+                                            ✅
+                                        </span>
                                         <span>{f}</span>
                                     </li>
                                 ))}
@@ -162,9 +185,10 @@ export function Description() {
                         </div>
 
                         <p className="max-w-xl pt-3 text-[13px] leading-relaxed text-white/70">
-                            ⚠️ Trading involves risk. Past performance does not guarantee
-                            future results. Market conditions, broker execution, spread,
-                            volatility, and risk settings can affect overall performance.
+                            ⚠️ Trading involves risk. Past performance does not
+                            guarantee future results. Market conditions, broker
+                            execution, spread, volatility, and risk settings can
+                            affect overall performance.
                         </p>
                     </div>
                 </Reveal>
@@ -198,9 +222,16 @@ export function Description() {
 
 /* -------------------- Results header + cards -------------------- */
 
-export function ResultsHeader({ source = 'Myfxbook V3.9' }: { source?: string }) {
+export function ResultsHeader({
+    source = 'Myfxbook V3.9',
+}: {
+    source?: string;
+}) {
     return (
-        <section id="results" className="relative bg-black pt-16 pb-10 md:pt-20">
+        <section
+            id="results"
+            className="relative bg-black pt-16 pb-10 md:pt-20"
+        >
             <div className="container-x text-center">
                 <Reveal>
                     <p className="text-[15px] tracking-wide text-white/85">
@@ -253,7 +284,9 @@ function ResultCard({
                 <h6 className="font-display text-[1.15rem] font-bold tracking-wider text-white uppercase">
                     {title}
                 </h6>
-                <p className="mx-auto mt-3 max-w-md leading-[1.7] text-white/80">{body}</p>
+                <p className="mx-auto mt-3 max-w-md leading-[1.7] text-white/80">
+                    {body}
+                </p>
                 <div className="mt-6 overflow-hidden rounded border border-white/10 shadow-[0_24px_60px_-30px_rgba(0,0,0,0.7)]">
                     <img
                         src={img}
@@ -322,7 +355,7 @@ export function WhyChoose() {
                         <div className="text-3xl" aria-hidden>
                             🧠
                         </div>
-                        <h1 className="font-display mt-3 text-[clamp(1.6rem,2.2vw+.7rem,2.4rem)] font-medium text-white">
+                        <h1 className="mt-3 font-display text-[clamp(1.6rem,2.2vw+.7rem,2.4rem)] font-medium text-white">
                             Why Traders Choose Tradivo Magic EA V12
                         </h1>
                     </div>
@@ -335,7 +368,7 @@ export function WhyChoose() {
                                 <div className="mx-auto inline-flex h-12 w-12 items-center justify-center text-white">
                                     <WhyIcon name={w.icon} />
                                 </div>
-                                <h3 className="font-display mt-3 text-[1.2rem] font-medium text-white">
+                                <h3 className="mt-3 font-display text-[1.2rem] font-medium text-white">
                                     {w.title}
                                 </h3>
                                 <p className="mt-2 text-[14px] leading-relaxed text-white/70">
@@ -358,6 +391,7 @@ function WhyIcon({ name }: { name: string }) {
         fill: 'currentColor',
         xmlns: 'http://www.w3.org/2000/svg',
     };
+
     switch (name) {
         case 'check':
             return (
@@ -410,12 +444,13 @@ export function PricingBanner() {
                     <p className="mx-auto max-w-3xl text-[15px] text-white/85">
                         Receive your <strong>download links</strong>,{' '}
                         <strong>activation email</strong>, and{' '}
-                        <strong>step-by-step setup video</strong> immediately after purchase.
+                        <strong>step-by-step setup video</strong> immediately
+                        after purchase.
                     </p>
                     <h2 className="section-title mt-4">
                         Get Instant Access to Tradivo Magic EA V12
                     </h2>
-                    <p className="font-display mt-3 font-semibold text-white/95">
+                    <p className="mt-3 font-display font-semibold text-white/95">
                         🔥 Launch Discount Active – Ends Soon
                     </p>
                 </Reveal>
@@ -485,13 +520,16 @@ export function Installation() {
 
                 <Reveal delay={120}>
                     <div className="mt-16 text-center">
-                        <h2 className="section-title">Steps of Purchase to Profit</h2>
-                        <h3 className="font-display mt-2 text-[1.4rem] font-medium text-white md:text-[1.7rem]">
+                        <h2 className="section-title">
+                            Steps of Purchase to Profit
+                        </h2>
+                        <h3 className="mt-2 font-display text-[1.4rem] font-medium text-white md:text-[1.7rem]">
                             How to Start with Tradivo Magic EA V12
                         </h3>
                         <p className="section-subtitle mx-auto mt-4">
-                            Follow these simple steps to install, activate, and start
-                            trading automatically with Tradivo Magic EA V12.0 on MT5.
+                            Follow these simple steps to install, activate, and
+                            start trading automatically with Tradivo Magic EA
+                            V12.0 on MT5.
                         </p>
                     </div>
                 </Reveal>
@@ -519,7 +557,7 @@ function StatCol({ value, label }: { value: string; label: string }) {
     return (
         <Reveal>
             <div className="text-center">
-                <div className="font-display text-shape text-[clamp(2.4rem,4vw+.5rem,3.4rem)] leading-none font-extrabold">
+                <div className="font-display text-[clamp(2.4rem,4vw+.5rem,3.4rem)] leading-none font-extrabold text-shape">
                     {value}
                 </div>
                 <p className="mt-3 text-[15px] text-white/80">{label}</p>
@@ -600,10 +638,13 @@ export function Testimonials({ reviews }: { reviews: Review[] }) {
             <div className="container-x">
                 <Reveal>
                     <div className="mx-auto max-w-2xl text-center">
-                        <h2 className="section-title">What Our Clients Say About Us?</h2>
+                        <h2 className="section-title">
+                            What Our Clients Say About Us?
+                        </h2>
                         <p className="section-subtitle mx-auto mt-4">
-                            Testimonials and success stories from traders running Tradivo
-                            Magic EA V12 on live and cent accounts.
+                            Testimonials and success stories from traders
+                            running Tradivo Magic EA V12 on live and cent
+                            accounts.
                         </p>
                         <div className="mt-7 flex justify-center">
                             <a href="/reviews" className="btn-outline-white">
@@ -618,7 +659,11 @@ export function Testimonials({ reviews }: { reviews: Review[] }) {
                         {reviews.map((t, i) => (
                             <Reveal key={t.id} delay={(i % 3) * 90}>
                                 <TestimonialCard
-                                    name={t.title ? `${t.name}, ${t.title}` : t.name}
+                                    name={
+                                        t.title
+                                            ? `${t.name}, ${t.title}`
+                                            : t.name
+                                    }
                                     body={t.body}
                                     rating={t.rating}
                                 />
@@ -649,7 +694,7 @@ function TestimonialCard({
     return (
         <div className="flex h-full flex-col rounded-md border border-white/10 bg-black/30 p-6">
             <div
-                className="text-shape mb-3 flex gap-0.5"
+                className="mb-3 flex gap-0.5 text-shape"
                 aria-label={`${rating} stars`}
             >
                 {Array.from({ length: rating }).map((_, j) => (
@@ -670,7 +715,7 @@ function TestimonialCard({
             <div className="mt-5 flex items-center gap-3">
                 <div
                     aria-hidden
-                    className="bg-shape/20 border-shape/40 font-display text-shape flex h-11 w-11 items-center justify-center rounded-full border font-semibold"
+                    className="flex h-11 w-11 items-center justify-center rounded-full border border-shape/40 bg-shape/20 font-display font-semibold text-shape"
                 >
                     {name.slice(0, 1).toUpperCase()}
                 </div>
@@ -692,7 +737,7 @@ export function ContactCta() {
         >
             <div
                 aria-hidden
-                className="bg-shape/20 pointer-events-none absolute -top-24 -right-24 h-[480px] w-[480px] rounded-full blur-3xl"
+                className="pointer-events-none absolute -top-24 -right-24 h-[480px] w-[480px] rounded-full bg-shape/20 blur-3xl"
             />
             <div className="container-x mx-auto max-w-3xl text-center">
                 <Reveal>
@@ -700,8 +745,8 @@ export function ContactCta() {
                         We&apos;re Here to Support Your Trading Success
                     </h2>
                     <p className="mt-3 text-white/80">
-                        Our Forex Trading Bot&apos;s dedicated support team will reach you
-                        very soon
+                        Our Forex Trading Bot&apos;s dedicated support team will
+                        reach you very soon
                     </p>
                 </Reveal>
             </div>
@@ -712,9 +757,9 @@ export function ContactCta() {
                         Ready to Automate Your Gold &amp; BTC Trading?
                     </h3>
                     <p className="mt-4 max-w-xl leading-[1.7] text-white/80">
-                        Discover what Tradivo Magic EA V12 can do for your trading. Our team
-                        is ready to help you set up, fine-tune, and get the most out of
-                        every basket cycle.
+                        Discover what Tradivo Magic EA V12 can do for your
+                        trading. Our team is ready to help you set up,
+                        fine-tune, and get the most out of every basket cycle.
                     </p>
                 </Reveal>
 

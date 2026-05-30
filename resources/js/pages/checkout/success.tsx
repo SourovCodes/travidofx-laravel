@@ -1,7 +1,7 @@
+import { Head, Link } from '@inertiajs/react';
 import FloatingWhatsApp from '@/components/FloatingWhatsApp';
 import Footer from '@/components/Footer';
 import Header from '@/components/Header';
-import { Head, Link } from '@inertiajs/react';
 
 export default function CheckoutSuccess({ sessionId }: { sessionId?: string }) {
     return (
@@ -16,7 +16,7 @@ export default function CheckoutSuccess({ sessionId }: { sessionId?: string }) {
                     <div className="container-x mx-auto max-w-2xl text-center">
                         <div
                             aria-hidden
-                            className="text-success mx-auto mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full border border-green-500/30 bg-green-500/10"
+                            className="mx-auto mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full border border-green-500/30 bg-green-500/10 text-success"
                         >
                             <svg
                                 width="36"
@@ -36,13 +36,14 @@ export default function CheckoutSuccess({ sessionId }: { sessionId?: string }) {
                             Thanks — your payment was successful
                         </h1>
                         <p className="section-subtitle mx-auto mt-4">
-                            Your license keys and download links are on their way to your
-                            inbox. Check spam if you don&apos;t see them within a few
-                            minutes.
+                            Your license keys and download links are on their
+                            way to your inbox. Check spam if you don&apos;t see
+                            them within a few minutes.
                         </p>
                         {sessionId && (
                             <p className="mt-6 text-xs text-white/45">
-                                Reference: <code className="font-mono">{sessionId}</code>
+                                Reference:{' '}
+                                <code className="font-mono">{sessionId}</code>
                             </p>
                         )}
                         <div className="mt-10 flex flex-wrap items-center justify-center gap-3">

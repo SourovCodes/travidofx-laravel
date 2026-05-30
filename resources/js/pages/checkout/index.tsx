@@ -1,3 +1,6 @@
+import { Head, Link, useForm } from '@inertiajs/react';
+import type { FormEvent } from 'react';
+import { useState } from 'react';
 import FloatingWhatsApp from '@/components/FloatingWhatsApp';
 import Footer from '@/components/Footer';
 import Header from '@/components/Header';
@@ -7,10 +10,8 @@ import {
     getExtraFee,
     getTotalWithFee,
     hasExtraFee,
-    type PaymentMethod,
 } from '@/lib/payment-fees';
-import { Head, Link, useForm } from '@inertiajs/react';
-import { FormEvent, useState } from 'react';
+import type { PaymentMethod } from '@/lib/payment-fees';
 
 type Plan = {
     name: string;
@@ -33,7 +34,10 @@ type CheckoutForm = {
     country: string;
     additionalInfo: string;
     paymentMethod: PaymentMethod;
+    promoCode: string;
 };
+
+type PromoStatus = 'idle' | 'checking' | 'applied' | 'invalid';
 
 function formatPercent(value: number) {
     return Number.isInteger(value) ? `${value}%` : `${value.toFixed(2)}%`;
@@ -41,6 +45,10 @@ function formatPercent(value: number) {
 
 export default function Checkout({ planSlug, plan, paymentFeeRate }: Props) {
     const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('stripe');
+    const [promoStatus, setPromoStatus] = useState<PromoStatus>('idle');
+    const [promoMessage, setPromoMessage] = useState('');
+    const [couponDiscount, setCouponDiscount] = useState(0);
+
     const { data, setData, post, processing, errors } = useForm<CheckoutForm>({
         plan: planSlug,
         email: '',
@@ -49,10 +57,11 @@ export default function Checkout({ planSlug, plan, paymentFeeRate }: Props) {
         country: '',
         additionalInfo: '',
         paymentMethod: 'stripe',
+        promoCode: '',
     });
 
-    const discount = plan.old_amount - plan.amount;
-    const payableAmount = plan.amount;
+    const launchDiscount = plan.old_amount - plan.amount;
+    const payableAmount = Math.max(0, plan.amount - couponDiscount);
     const extraFee = getExtraFee(payableAmount, paymentMethod, paymentFeeRate);
     const total = getTotalWithFee(payableAmount, paymentMethod, paymentFeeRate);
     const feePercent = paymentFeeRate * 100;
@@ -62,9 +71,63 @@ export default function Checkout({ planSlug, plan, paymentFeeRate }: Props) {
         setData('paymentMethod', m);
     };
 
+    const resetPromo = (code: string) => {
+        setData('promoCode', code);
+        setPromoStatus('idle');
+        setPromoMessage('');
+        setCouponDiscount(0);
+    };
+
+    const applyPromo = async () => {
+        const code = data.promoCode.trim();
+
+        if (!code) {
+            return;
+        }
+
+        setPromoStatus('checking');
+        setPromoMessage('');
+
+        try {
+            const response = await fetch(
+                `/api/coupons/validate?code=${encodeURIComponent(code)}&plan=${planSlug}`,
+                { headers: { Accept: 'application/json' } },
+            );
+            const json = (await response.json()) as {
+                valid?: boolean;
+                code?: string;
+                discount?: number;
+                message?: string;
+            };
+
+            if (!response.ok || !json.valid) {
+                setCouponDiscount(0);
+                setPromoStatus('invalid');
+                setPromoMessage(json.message ?? 'Coupon code is not valid.');
+
+                return;
+            }
+
+            setData('promoCode', json.code ?? code);
+            setCouponDiscount(Number(json.discount) || 0);
+            setPromoStatus('applied');
+            setPromoMessage(
+                `Coupon applied: -$${formatMoney(Number(json.discount) || 0)}.`,
+            );
+        } catch {
+            setCouponDiscount(0);
+            setPromoStatus('invalid');
+            setPromoMessage('Could not reach coupon service. Try again.');
+        }
+    };
+
     const submit = (e: FormEvent) => {
         e.preventDefault();
-        if (paymentMethod !== 'stripe') return;
+
+        if (paymentMethod !== 'stripe') {
+            return;
+        }
+
         post('/checkout');
     };
 
@@ -79,11 +142,13 @@ export default function Checkout({ planSlug, plan, paymentFeeRate }: Props) {
                 >
                     <div className="container-x">
                         <p className="eyebrow">Checkout</p>
-                        <h1 className="section-title mt-3">Complete Your Order</h1>
+                        <h1 className="section-title mt-3">
+                            Complete Your Order
+                        </h1>
                         <p className="section-subtitle mt-3">
-                            You&apos;re seconds away from automated XAUUSD &amp; BTCUSD
-                            trading on MT5. License keys and download links are emailed
-                            instantly.
+                            You&apos;re seconds away from automated XAUUSD &amp;
+                            BTCUSD trading on MT5. License keys and download
+                            links are emailed instantly.
                         </p>
                     </div>
                 </section>
@@ -92,7 +157,7 @@ export default function Checkout({ planSlug, plan, paymentFeeRate }: Props) {
                     <div className="container-x grid items-start gap-10 lg:grid-cols-[1.3fr_0.9fr]">
                         <form
                             onSubmit={submit}
-                            className="bg-card space-y-8 rounded-2xl border border-white/10 p-6 md:p-8"
+                            className="space-y-8 rounded-2xl border border-white/10 bg-card p-6 md:p-8"
                         >
                             <fieldset className="space-y-5">
                                 <legend className="font-display text-lg font-bold text-white">
@@ -113,7 +178,9 @@ export default function Checkout({ planSlug, plan, paymentFeeRate }: Props) {
                                         name="firstName"
                                         required
                                         value={data.firstName}
-                                        onChange={(v) => setData('firstName', v)}
+                                        onChange={(v) =>
+                                            setData('firstName', v)
+                                        }
                                         error={errors.firstName}
                                     />
                                     <Field
@@ -140,13 +207,60 @@ export default function Checkout({ planSlug, plan, paymentFeeRate }: Props) {
                                     optional
                                     placeholder="Anything we should know about your order? (optional)"
                                     value={data.additionalInfo}
-                                    onChange={(v) => setData('additionalInfo', v)}
+                                    onChange={(v) =>
+                                        setData('additionalInfo', v)
+                                    }
                                     error={errors.additionalInfo}
                                 />
                             </fieldset>
 
                             <fieldset className="space-y-3">
-                                <legend className="font-display mb-2 text-lg font-bold text-white">
+                                <legend className="mb-2 font-display text-lg font-bold text-white">
+                                    Promo / Coupon Code
+                                </legend>
+                                <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
+                                    <div className="flex flex-wrap items-center gap-3">
+                                        <input
+                                            name="promoCode"
+                                            value={data.promoCode}
+                                            onChange={(e) =>
+                                                resetPromo(e.target.value)
+                                            }
+                                            placeholder="Enter your promo or coupon code"
+                                            className="min-w-[220px] flex-1 rounded-lg border border-white/15 bg-white/[0.04] px-4 py-3 text-sm text-white placeholder:text-white/40 focus:border-shape focus:bg-white/[0.06] focus:outline-none"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={applyPromo}
+                                            disabled={
+                                                data.promoCode.trim().length ===
+                                                    0 ||
+                                                promoStatus === 'checking'
+                                            }
+                                            className="btn-ghost disabled:cursor-not-allowed disabled:opacity-50"
+                                        >
+                                            {promoStatus === 'checking'
+                                                ? 'Checking...'
+                                                : 'Apply'}
+                                        </button>
+                                    </div>
+                                    <p
+                                        className={`mt-2 text-xs ${
+                                            promoStatus === 'applied'
+                                                ? 'text-green-100'
+                                                : promoStatus === 'invalid'
+                                                  ? 'text-red-100'
+                                                  : 'text-white/60'
+                                        }`}
+                                    >
+                                        {promoMessage ||
+                                            'Have a code? Apply it before completing payment.'}
+                                    </p>
+                                </div>
+                            </fieldset>
+
+                            <fieldset className="space-y-3">
+                                <legend className="mb-2 font-display text-lg font-bold text-white">
                                     Payment Method
                                 </legend>
                                 <PaymentOptions
@@ -161,8 +275,8 @@ export default function Checkout({ planSlug, plan, paymentFeeRate }: Props) {
                             </fieldset>
                         </form>
 
-                        <aside className="bg-card rounded-2xl border border-white/10 p-6 lg:sticky lg:top-24">
-                            <h2 className="font-display mb-5 text-lg font-bold text-white">
+                        <aside className="rounded-2xl border border-white/10 bg-card p-6 lg:sticky lg:top-24">
+                            <h2 className="mb-5 font-display text-lg font-bold text-white">
                                 Order Summary
                             </h2>
                             <div className="flex gap-4">
@@ -183,7 +297,7 @@ export default function Checkout({ planSlug, plan, paymentFeeRate }: Props) {
                                         {plan.subtitle}
                                     </div>
                                 </div>
-                                <div className="font-display ml-auto font-bold text-white">
+                                <div className="ml-auto font-display font-bold text-white">
                                     ${formatMoney(plan.amount)}
                                 </div>
                             </div>
@@ -196,15 +310,28 @@ export default function Checkout({ planSlug, plan, paymentFeeRate }: Props) {
                                     </dd>
                                 </div>
                                 <div className="flex justify-between">
-                                    <dt className="text-white/65">Launch discount</dt>
-                                    <dd className="font-display text-success font-semibold">
-                                        - ${formatMoney(discount)}
+                                    <dt className="text-white/65">
+                                        Launch discount
+                                    </dt>
+                                    <dd className="font-display font-semibold text-success">
+                                        - ${formatMoney(launchDiscount)}
                                     </dd>
                                 </div>
+                                {couponDiscount > 0 && (
+                                    <div className="flex justify-between">
+                                        <dt className="text-white/65">
+                                            Coupon discount
+                                        </dt>
+                                        <dd className="font-display font-semibold text-success">
+                                            - ${formatMoney(couponDiscount)}
+                                        </dd>
+                                    </div>
+                                )}
                                 {hasExtraFee(paymentMethod) && (
                                     <div className="flex justify-between">
                                         <dt className="text-white/65">
-                                            Payment fee ({formatPercent(feePercent)})
+                                            Payment fee (
+                                            {formatPercent(feePercent)})
                                         </dt>
                                         <dd className="font-display font-semibold text-white">
                                             ${formatMoney(extraFee)}
@@ -215,7 +342,7 @@ export default function Checkout({ planSlug, plan, paymentFeeRate }: Props) {
                                     <dt className="font-display font-bold text-white">
                                         Total
                                     </dt>
-                                    <dd className="font-display text-shape text-xl font-extrabold">
+                                    <dd className="font-display text-xl font-extrabold text-shape">
                                         ${formatMoney(total)}
                                     </dd>
                                 </div>
@@ -232,7 +359,7 @@ export default function Checkout({ planSlug, plan, paymentFeeRate }: Props) {
                                 Need help?{' '}
                                 <Link
                                     href="mailto:info@tradivofx.com"
-                                    className="text-shape font-semibold hover:opacity-80"
+                                    className="font-semibold text-shape hover:opacity-80"
                                 >
                                     info@tradivofx.com
                                 </Link>
@@ -270,9 +397,10 @@ function Field({
 }) {
     const sharedClass =
         'w-full rounded-lg bg-white/[0.04] border border-white/15 px-4 py-3 text-white placeholder:text-white/40 focus:outline-none focus:border-shape focus:bg-white/[0.06]';
+
     return (
         <label className="block">
-            <span className="font-display mb-2 flex items-baseline gap-2 text-xs font-semibold tracking-widest text-white/60 uppercase">
+            <span className="mb-2 flex items-baseline gap-2 font-display text-xs font-semibold tracking-widest text-white/60 uppercase">
                 <span>{label}</span>
                 {required && <span className="text-shape">*</span>}
                 {optional && (

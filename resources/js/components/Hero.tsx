@@ -21,7 +21,8 @@ const SLIDES: Slide[] = [
         ),
         body: (
             <>
-                Automated <strong>XAUUSD &amp; BTCUSD</strong> trading on MT5 with
+                Automated <strong>XAUUSD &amp; BTCUSD</strong> trading on MT5
+                with
                 <br />
                 <strong>HTF trend filtering</strong>,{' '}
                 <strong>counter-trend grid execution</strong>, and
@@ -58,7 +59,8 @@ const SLIDES: Slide[] = [
         titleRest: <> &amp; BTC, One EA</>,
         body: (
             <>
-                Optimized for <strong>XAUUSD</strong> and <strong>BTCUSD</strong> on the
+                Optimized for <strong>XAUUSD</strong> and{' '}
+                <strong>BTCUSD</strong> on the
                 <br />
                 <strong>1M timeframe</strong>. Choose Balanced, Aggressive,
                 <br />
@@ -72,12 +74,19 @@ export default function Hero() {
     const [idx, setIdx] = useState(0);
 
     useEffect(() => {
-        const t = setInterval(() => setIdx((i) => (i + 1) % SLIDES.length), 7000);
+        const t = setInterval(
+            () => setIdx((i) => (i + 1) % SLIDES.length),
+            7000,
+        );
+
         return () => clearInterval(t);
     }, []);
 
     return (
-        <section id="home" className="relative overflow-hidden bg-black text-white">
+        <section
+            id="home"
+            className="relative overflow-hidden bg-black text-white"
+        >
             <div
                 aria-hidden
                 className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -100,11 +109,13 @@ export default function Hero() {
                             className="slide-fade"
                             data-active={i === idx ? 'true' : 'false'}
                         >
-                            <h4 className="font-display text-shape px-1 text-[clamp(.78rem,1vw+.4rem,1.15rem)] font-bold tracking-[0.22em] uppercase">
+                            <h4 className="px-1 font-display text-[clamp(.78rem,1vw+.4rem,1.15rem)] font-bold tracking-[0.22em] text-shape uppercase">
                                 {s.sub}
                             </h4>
-                            <h1 className="font-display mt-3 px-2 text-[clamp(1.55rem,3.6vw+0.4rem,3.6rem)] leading-[1.05] font-medium tracking-tight text-white uppercase sm:mt-4">
-                                <span className="first-word">{s.firstWord}</span>
+                            <h1 className="mt-3 px-2 font-display text-[clamp(1.55rem,3.6vw+0.4rem,3.6rem)] leading-[1.05] font-medium tracking-tight text-white uppercase sm:mt-4">
+                                <span className="first-word">
+                                    {s.firstWord}
+                                </span>
                                 {s.titleRest}
                             </h1>
                             <p className="mt-4 max-w-xl px-3 text-[clamp(.85rem,0.9vw+.55rem,1.15rem)] leading-[1.65] text-white/85 sm:mt-6">

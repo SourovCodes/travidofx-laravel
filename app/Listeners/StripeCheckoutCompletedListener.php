@@ -53,6 +53,8 @@ class StripeCheckoutCompletedListener
             'country' => $metadata['country'] ?? null,
             'plan_slug' => $metadata['plan'] ?? 'unknown',
             'plan_name' => $metadata['plan'] ?? 'Unknown plan',
+            'coupon_code' => ($metadata['couponCode'] ?? '') !== '' ? $metadata['couponCode'] : null,
+            'coupon_discount_cents' => (int) round(((float) ($metadata['couponDiscount'] ?? 0)) * 100),
             'amount_cents' => (int) ($object['amount_total'] ?? 0),
             'currency' => $object['currency'] ?? 'usd',
             'status' => $status,

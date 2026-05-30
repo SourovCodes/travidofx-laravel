@@ -38,6 +38,13 @@ class OrdersTable
                 TextColumn::make('payment_method')
                     ->label('Method')
                     ->toggleable(),
+                TextColumn::make('coupon_code')
+                    ->label('Coupon')
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('coupon_discount_cents')
+                    ->label('Coupon discount')
+                    ->money(fn (Order $record) => $record->currency, divideBy: 100)
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('first_name')
                     ->label('First')
                     ->toggleable(isToggledHiddenByDefault: true),
