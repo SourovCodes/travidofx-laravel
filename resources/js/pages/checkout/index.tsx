@@ -5,6 +5,7 @@ import FloatingWhatsApp from '@/components/FloatingWhatsApp';
 import Footer from '@/components/Footer';
 import Header from '@/components/Header';
 import PaymentOptions from '@/components/PaymentOptions';
+import type { CryptoWallet } from '@/components/PaymentOptions';
 import {
     formatMoney,
     getExtraFee,
@@ -24,6 +25,7 @@ type Props = {
     planSlug: string;
     plan: Plan;
     paymentFeeRate: number;
+    cryptoWallets: CryptoWallet[];
 };
 
 type CheckoutForm = {
@@ -43,7 +45,12 @@ function formatPercent(value: number) {
     return Number.isInteger(value) ? `${value}%` : `${value.toFixed(2)}%`;
 }
 
-export default function Checkout({ planSlug, plan, paymentFeeRate }: Props) {
+export default function Checkout({
+    planSlug,
+    plan,
+    paymentFeeRate,
+    cryptoWallets,
+}: Props) {
     const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('stripe');
     const [promoStatus, setPromoStatus] = useState<PromoStatus>('idle');
     const [promoMessage, setPromoMessage] = useState('');
@@ -271,6 +278,7 @@ export default function Checkout({ planSlug, plan, paymentFeeRate }: Props) {
                                     onMethodChange={handleMethodChange}
                                     feeRate={paymentFeeRate}
                                     processing={processing}
+                                    cryptoWallets={cryptoWallets}
                                 />
                             </fieldset>
                         </form>

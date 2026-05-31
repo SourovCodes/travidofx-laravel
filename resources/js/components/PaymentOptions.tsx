@@ -10,39 +10,12 @@ import type { PaymentMethod } from '@/lib/payment-fees';
 
 const WHATSAPP_NUMBER = '14075617294';
 
-type Coin = 'usdt-bep20' | 'usdt-trc20' | 'btc' | 'ltc';
-
-const CRYPTO_WALLETS: {
-    key: Coin;
+export type CryptoWallet = {
+    key: string;
     asset: string;
     network: string;
     address: string;
-}[] = [
-    {
-        key: 'usdt-bep20',
-        asset: 'USDT',
-        network: 'BEP20 (BSC)',
-        address: '0xYOUR_BEP20_ADDRESS_HERE',
-    },
-    {
-        key: 'usdt-trc20',
-        asset: 'USDT',
-        network: 'TRC20 (Tron)',
-        address: 'TYOUR_TRC20_ADDRESS_HERE',
-    },
-    {
-        key: 'btc',
-        asset: 'BTC',
-        network: 'Bitcoin',
-        address: 'bc1YOUR_BTC_ADDRESS_HERE',
-    },
-    {
-        key: 'ltc',
-        asset: 'LTC',
-        network: 'Litecoin',
-        address: 'ltc1YOUR_LTC_ADDRESS_HERE',
-    },
-];
+};
 
 function waLink(message: string) {
     return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
@@ -50,6 +23,20 @@ function waLink(message: string) {
 
 function formatPercent(value: number) {
     return Number.isInteger(value) ? `${value}%` : `${value.toFixed(2)}%`;
+}
+
+function cryptoSubtitle(wallets: CryptoWallet[]) {
+    if (wallets.length === 0) {
+        return 'Currently unavailable';
+    }
+
+    const labels = wallets.map((w) =>
+        w.network ? `${w.asset} (${w.network})` : w.asset,
+    );
+
+    return labels.length <= 3
+        ? labels.join(', ')
+        : `${labels.slice(0, 3).join(', ')} + ${labels.length - 3} more`;
 }
 
 export default function PaymentOptions({
@@ -60,6 +47,7 @@ export default function PaymentOptions({
     onMethodChange,
     feeRate = EXTRA_FEE_RATE,
     processing = false,
+    cryptoWallets = [],
 }: {
     amount: number;
     productName: string;
@@ -68,9 +56,13 @@ export default function PaymentOptions({
     onMethodChange: (method: PaymentMethod) => void;
     feeRate?: number;
     processing?: boolean;
+    cryptoWallets?: CryptoWallet[];
 }) {
-    const [coin, setCoin] = useState<Coin>('usdt-bep20');
-    const activeCoin = CRYPTO_WALLETS.find((c) => c.key === coin)!;
+    const [coinKey, setCoinKey] = useState<string>(
+        cryptoWallets[0]?.key ?? '',
+    );
+    const activeCoin =
+        cryptoWallets.find((c) => c.key === coinKey) ?? cryptoWallets[0];
     const fee = getExtraFee(amount, method, feeRate);
     const total = getTotalWithFee(amount, method, feeRate);
     const feePercent = feeRate * 100;
@@ -107,23 +99,28 @@ export default function PaymentOptions({
                 method={method}
                 onChange={onMethodChange}
                 title="Crypto"
-                subtitle="USDT (BEP20 / TRC20), BTC, LTC"
+                subtitle={cryptoSubtitle(cryptoWallets)}
                 trailing={
-                    <span className="font-display text-[11px] font-bold tracking-widest text-shape uppercase">
-                        4 networks
-                    </span>
+                    cryptoWallets.length > 0 ? (
+                        <span className="font-display text-[11px] font-bold tracking-widest text-shape uppercase">
+                            {cryptoWallets.length}{' '}
+                            {cryptoWallets.length === 1
+                                ? 'network'
+                                : 'networks'}
+                        </span>
+                    ) : null
                 }
             >
-                {method === 'crypto' && (
+                {method === 'crypto' && activeCoin && (
                     <div className="mt-4 space-y-4 rounded-xl border border-white/10 bg-black/30 p-4">
                         <div className="grid grid-cols-2 gap-2">
-                            {CRYPTO_WALLETS.map((c) => (
+                            {cryptoWallets.map((c) => (
                                 <button
                                     key={c.key}
                                     type="button"
-                                    onClick={() => setCoin(c.key)}
+                                    onClick={() => setCoinKey(c.key)}
                                     className={`rounded-lg border px-3 py-2.5 text-left transition-colors ${
-                                        coin === c.key
+                                        activeCoin.key === c.key
                                             ? 'border-shape bg-shape/10'
                                             : 'border-white/10 bg-white/[0.03] hover:border-shape/40'
                                     }`}
@@ -168,6 +165,13 @@ export default function PaymentOptions({
                             <WhatsAppIcon />
                             Send Payment Proof on WhatsApp
                         </a>
+                    </div>
+                )}
+                {method === 'crypto' && !activeCoin && (
+                    <div className="mt-4 rounded-xl border border-white/10 bg-black/30 p-4 text-sm text-white/70">
+                        Crypto payments are temporarily unavailable. Please
+                        choose another payment method or contact us on
+                        WhatsApp.
                     </div>
                 )}
             </MethodRow>
