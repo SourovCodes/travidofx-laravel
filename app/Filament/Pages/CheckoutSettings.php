@@ -31,7 +31,9 @@ class CheckoutSettings extends Page implements HasForms
     public function mount(): void
     {
         $this->form->fill([
-            'payment_fee_percent' => round(Setting::getFloat(Setting::PAYMENT_FEE_RATE, 0.05) * 100, 2),
+            'stripe_fee_percent' => self::rateToPercent(Setting::paymentFeeRateFor('stripe')),
+            'skrill_fee_percent' => self::rateToPercent(Setting::paymentFeeRateFor('skrill')),
+            'payoneer_fee_percent' => self::rateToPercent(Setting::paymentFeeRateFor('payoneer')),
         ]);
     }
 
@@ -39,18 +41,13 @@ class CheckoutSettings extends Page implements HasForms
     {
         return $schema
             ->components([
-                Section::make('Payment processing')
-                    ->description('Fee added on top of card/Skrill/Payoneer payments shown at checkout.')
+                Section::make('Payment processing fees')
+                    ->description('Set the fee percentage added on top of each non-crypto payment method shown at checkout.')
+                    ->columns(3)
                     ->components([
-                        TextInput::make('payment_fee_percent')
-                            ->label('Payment fee (%)')
-                            ->required()
-                            ->numeric()
-                            ->minValue(0)
-                            ->maxValue(100)
-                            ->step(0.01)
-                            ->suffix('%')
-                            ->helperText('For example, enter 5 for a 5% fee. Set to 0 to disable.'),
+                        self::percentInput('stripe_fee_percent', 'Card (Stripe) fee (%)'),
+                        self::percentInput('skrill_fee_percent', 'Skrill / Neteller fee (%)'),
+                        self::percentInput('payoneer_fee_percent', 'Payoneer / Wise fee (%)'),
                     ]),
             ])
             ->statePath('data');
@@ -69,12 +66,31 @@ class CheckoutSettings extends Page implements HasForms
     {
         $state = $this->form->getState();
 
-        $percent = (float) ($state['payment_fee_percent'] ?? 0);
-        Setting::set(Setting::PAYMENT_FEE_RATE, $percent / 100);
+        Setting::set(Setting::PAYMENT_FEE_RATE_STRIPE, ((float) ($state['stripe_fee_percent'] ?? 0)) / 100);
+        Setting::set(Setting::PAYMENT_FEE_RATE_SKRILL, ((float) ($state['skrill_fee_percent'] ?? 0)) / 100);
+        Setting::set(Setting::PAYMENT_FEE_RATE_PAYONEER, ((float) ($state['payoneer_fee_percent'] ?? 0)) / 100);
 
         Notification::make()
             ->title('Settings saved')
             ->success()
             ->send();
+    }
+
+    private static function percentInput(string $name, string $label): TextInput
+    {
+        return TextInput::make($name)
+            ->label($label)
+            ->required()
+            ->numeric()
+            ->minValue(0)
+            ->maxValue(100)
+            ->step(0.01)
+            ->suffix('%')
+            ->helperText('Set to 0 to disable.');
+    }
+
+    private static function rateToPercent(float $rate): float
+    {
+        return round($rate * 100, 2);
     }
 }

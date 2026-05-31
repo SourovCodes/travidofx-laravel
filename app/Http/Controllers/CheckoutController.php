@@ -22,7 +22,7 @@ class CheckoutController extends Controller
         return Inertia::render('checkout/index', [
             'planSlug' => $planSlug,
             'plan' => $plan,
-            'paymentFeeRate' => Setting::getFloat(Setting::PAYMENT_FEE_RATE, (float) config('plans.fee_rate')),
+            'paymentFeeRates' => Setting::paymentFeeRates(),
             'cryptoWallets' => CryptoWallet::active()
                 ->orderBy('sort_order')
                 ->orderBy('id')
@@ -46,7 +46,8 @@ class CheckoutController extends Controller
 
         $planSlug = $this->resolvePlan($data['plan']);
         $plan = config("plans.lookup.{$planSlug}");
-        $feeRate = Setting::getFloat(Setting::PAYMENT_FEE_RATE, (float) config('plans.fee_rate'));
+        $paymentMethod = $data['paymentMethod'] ?? 'stripe';
+        $feeRate = Setting::paymentFeeRateFor($paymentMethod);
 
         $base = (float) $plan['amount'];
         $couponCode = trim((string) ($data['promoCode'] ?? ''));
@@ -90,7 +91,7 @@ class CheckoutController extends Controller
             'cancel_url' => route('checkout.cancel'),
             'metadata' => [
                 'plan' => $planSlug,
-                'paymentMethod' => $data['paymentMethod'] ?? 'stripe',
+                'paymentMethod' => $paymentMethod,
                 'baseAmount' => number_format($base, 2, '.', ''),
                 'couponCode' => $coupon?->code ?? '',
                 'couponDiscount' => number_format($couponDiscount, 2, '.', ''),
@@ -117,7 +118,7 @@ class CheckoutController extends Controller
             'amount_cents' => $totalCents,
             'currency' => 'usd',
             'status' => Order::STATUS_PENDING,
-            'payment_method' => $data['paymentMethod'] ?? 'stripe',
+            'payment_method' => $paymentMethod,
             'additional_info' => $data['additionalInfo'] ?? null,
         ]);
 

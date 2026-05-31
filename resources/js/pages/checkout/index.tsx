@@ -7,12 +7,14 @@ import Header from '@/components/Header';
 import PaymentOptions from '@/components/PaymentOptions';
 import type { CryptoWallet } from '@/components/PaymentOptions';
 import {
+    DEFAULT_FEE_RATES,
     formatMoney,
     getExtraFee,
+    getRate,
     getTotalWithFee,
     hasExtraFee,
 } from '@/lib/payment-fees';
-import type { PaymentMethod } from '@/lib/payment-fees';
+import type { FeeRates, PaymentMethod } from '@/lib/payment-fees';
 
 type Plan = {
     name: string;
@@ -24,7 +26,7 @@ type Plan = {
 type Props = {
     planSlug: string;
     plan: Plan;
-    paymentFeeRate: number;
+    paymentFeeRates: FeeRates;
     cryptoWallets: CryptoWallet[];
 };
 
@@ -48,7 +50,7 @@ function formatPercent(value: number) {
 export default function Checkout({
     planSlug,
     plan,
-    paymentFeeRate,
+    paymentFeeRates = DEFAULT_FEE_RATES,
     cryptoWallets,
 }: Props) {
     const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('stripe');
@@ -69,9 +71,13 @@ export default function Checkout({
 
     const launchDiscount = plan.old_amount - plan.amount;
     const payableAmount = Math.max(0, plan.amount - couponDiscount);
-    const extraFee = getExtraFee(payableAmount, paymentMethod, paymentFeeRate);
-    const total = getTotalWithFee(payableAmount, paymentMethod, paymentFeeRate);
-    const feePercent = paymentFeeRate * 100;
+    const extraFee = getExtraFee(payableAmount, paymentMethod, paymentFeeRates);
+    const total = getTotalWithFee(
+        payableAmount,
+        paymentMethod,
+        paymentFeeRates,
+    );
+    const feePercent = getRate(paymentFeeRates, paymentMethod) * 100;
 
     const handleMethodChange = (m: PaymentMethod) => {
         setPaymentMethod(m);
@@ -276,7 +282,7 @@ export default function Checkout({
                                     planSlug={planSlug}
                                     method={paymentMethod}
                                     onMethodChange={handleMethodChange}
-                                    feeRate={paymentFeeRate}
+                                    feeRates={paymentFeeRates}
                                     processing={processing}
                                     cryptoWallets={cryptoWallets}
                                 />

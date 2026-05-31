@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import {
-    EXTRA_FEE_RATE,
+    DEFAULT_FEE_RATES,
     formatMoney,
     getExtraFee,
+    getRate,
     getTotalWithFee,
     hasExtraFee,
 } from '@/lib/payment-fees';
-import type { PaymentMethod } from '@/lib/payment-fees';
+import type { FeeRates, PaymentMethod } from '@/lib/payment-fees';
 
 const WHATSAPP_NUMBER = '14075617294';
 
@@ -45,7 +46,7 @@ export default function PaymentOptions({
     planSlug,
     method,
     onMethodChange,
-    feeRate = EXTRA_FEE_RATE,
+    feeRates = DEFAULT_FEE_RATES,
     processing = false,
     cryptoWallets = [],
 }: {
@@ -54,7 +55,7 @@ export default function PaymentOptions({
     planSlug: string;
     method: PaymentMethod;
     onMethodChange: (method: PaymentMethod) => void;
-    feeRate?: number;
+    feeRates?: FeeRates;
     processing?: boolean;
     cryptoWallets?: CryptoWallet[];
 }) {
@@ -63,10 +64,11 @@ export default function PaymentOptions({
     );
     const activeCoin =
         cryptoWallets.find((c) => c.key === coinKey) ?? cryptoWallets[0];
-    const fee = getExtraFee(amount, method, feeRate);
-    const total = getTotalWithFee(amount, method, feeRate);
-    const feePercent = feeRate * 100;
-    const feePercentLabel = formatPercent(feePercent);
+    const fee = getExtraFee(amount, method, feeRates);
+    const total = getTotalWithFee(amount, method, feeRates);
+    const feePercentLabel = formatPercent(getRate(feeRates, method) * 100);
+    const labelFor = (m: PaymentMethod) =>
+        formatPercent(getRate(feeRates, m) * 100);
 
     return (
         <div className="space-y-3">
@@ -78,7 +80,7 @@ export default function PaymentOptions({
                 method={method}
                 onChange={onMethodChange}
                 title="Credit / Debit Card"
-                subtitle={`${feePercentLabel} processing fee applies`}
+                subtitle={`${labelFor('stripe')} processing fee applies`}
                 trailing={
                     <span className="hidden gap-1.5 font-display text-[10px] font-bold tracking-widest uppercase sm:inline-flex">
                         <span className="rounded bg-[#1A1F71] px-2 py-1 text-white">
@@ -181,7 +183,7 @@ export default function PaymentOptions({
                 method={method}
                 onChange={onMethodChange}
                 title="Skrill / Neteller"
-                subtitle={`${feePercentLabel} processing fee applies`}
+                subtitle={`${labelFor('skrill')} processing fee applies`}
             >
                 {method === 'skrill' && (
                     <ContactBlock
@@ -196,7 +198,7 @@ export default function PaymentOptions({
                 method={method}
                 onChange={onMethodChange}
                 title="Payoneer / Wise"
-                subtitle={`${feePercentLabel} processing fee applies`}
+                subtitle={`${labelFor('payoneer')} processing fee applies`}
             >
                 {method === 'payoneer' && (
                     <ContactBlock
