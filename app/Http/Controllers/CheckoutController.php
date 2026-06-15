@@ -6,11 +6,11 @@ use App\Models\Coupon;
 use App\Models\CryptoWallet;
 use App\Models\Order;
 use App\Models\Setting;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use Laravel\Cashier\Cashier;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 class CheckoutController extends Controller
 {
@@ -31,7 +31,7 @@ class CheckoutController extends Controller
         ]);
     }
 
-    public function createSession(Request $request): RedirectResponse
+    public function createSession(Request $request): SymfonyResponse
     {
         $data = $request->validate([
             'plan' => ['required', 'string'],
@@ -122,7 +122,7 @@ class CheckoutController extends Controller
             'additional_info' => $data['additionalInfo'] ?? null,
         ]);
 
-        return redirect($session->url, 303);
+        return Inertia::location(redirect()->away($session->url, 303));
     }
 
     public function success(Request $request): Response

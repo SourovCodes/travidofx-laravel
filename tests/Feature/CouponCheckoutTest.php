@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Coupon;
+use Stripe\StripeClient;
 
 test('active coupons can be validated for the selected plan', function () {
     Coupon::create([
@@ -59,4 +60,66 @@ test('checkout rejects an invalid coupon before creating a payment session', fun
         ])
         ->assertRedirect(route('checkout', ['plan' => 'pro']))
         ->assertSessionHasErrors('promoCode');
+});
+
+test('checkout sends inertia requests to stripe with an external location response', function () {
+    $stripeCheckoutUrl = 'https://checkout.stripe.com/c/pay/cs_test_123';
+
+    $this->app->bind(StripeClient::class, fn () => new class($stripeCheckoutUrl)
+    {
+        public function __construct(public string $stripeCheckoutUrl) {}
+
+        public function __get(string $name): object
+        {
+            if ($name === 'checkout') {
+                return new class($this->stripeCheckoutUrl)
+                {
+                    public function __construct(private string $stripeCheckoutUrl) {}
+
+                    public function __get(string $name): object
+                    {
+                        if ($name === 'sessions') {
+                            return new class($this->stripeCheckoutUrl)
+                            {
+                                public function __construct(private string $stripeCheckoutUrl) {}
+
+                                public function create(array $payload): object
+                                {
+                                    return (object) [
+                                        'id' => 'cs_test_123',
+                                        'url' => $this->stripeCheckoutUrl,
+                                    ];
+                                }
+                            };
+                        }
+
+                        throw new RuntimeException("Unexpected Stripe checkout property [{$name}].");
+                    }
+                };
+            }
+
+            throw new RuntimeException("Unexpected Stripe property [{$name}].");
+        }
+    });
+
+    $this->withHeader('X-Inertia', 'true')
+        ->post(route('checkout.session'), [
+            'plan' => 'basic',
+            'email' => 'customer@example.com',
+            'firstName' => 'Test',
+            'lastName' => 'Customer',
+            'country' => 'United States',
+            'additionalInfo' => '',
+            'paymentMethod' => 'stripe',
+            'promoCode' => '',
+        ])
+        ->assertConflict()
+        ->assertHeader('X-Inertia-Location', $stripeCheckoutUrl);
+
+    $this->assertDatabaseHas('orders', [
+        'stripe_session_id' => 'cs_test_123',
+        'email' => 'customer@example.com',
+        'plan_slug' => 'basic',
+        'status' => 'pending',
+    ]);
 });
