@@ -3,30 +3,69 @@
 return [
     'fee_rate' => 0.05,
 
+    'result_links' => [
+        'balanced' => 'https://www.myfxbook.com/members/Tradivorobot/tradivorobot/12044419',
+        'aggressive' => 'https://www.myfxbook.com/members/Tradivorobot/tradivo-magic-ea/12044405',
+    ],
+
     'lookup' => [
         'basic' => [
-            'name' => 'Tradivo Magic EA V12 — Basic',
-            'subtitle' => '3 Months access · 1 Key License · XAUUSD',
+            'name' => 'Basic',
+            'product_name' => 'Tradivo Magic EA V12 — Basic',
+            'access_duration' => '3 Months Access',
             'amount' => 149,
             'old_amount' => 199,
+            'features' => [
+                '1 Key License',
+                'XAUUSD Support',
+                'Help & Support',
+                'Free Updates',
+            ],
+            'badge' => null,
         ],
         'pro' => [
-            'name' => 'Tradivo Magic EA V12 — Pro',
-            'subtitle' => '1 Year access · 3 Key Licenses · XAUUSD',
+            'name' => 'Pro',
+            'product_name' => 'Tradivo Magic EA V12 — Pro',
+            'access_duration' => '1 Year Access',
             'amount' => 299,
             'old_amount' => 399,
+            'features' => [
+                '3 Key Licenses',
+                'XAUUSD Support',
+                'Priority Support',
+                'Free Updates',
+            ],
+            'badge' => 'popular',
         ],
         'master' => [
-            'name' => 'Tradivo Magic EA V12 — Master',
-            'subtitle' => '1 Year access · 5 Key Licenses · XAUUSD + BTC',
+            'name' => 'Master',
+            'product_name' => 'Tradivo Magic EA V12 — Master',
+            'access_duration' => '1 Year Access',
             'amount' => 499,
             'old_amount' => 699,
+            'features' => [
+                '5 Key Licenses',
+                'XAUUSD + BTC',
+                'Premium Support',
+                'Advanced Features',
+                'Free Updates',
+            ],
+            'badge' => null,
         ],
         'unlimited' => [
-            'name' => 'Tradivo Magic EA V12 — Unlimited',
-            'subtitle' => 'Lifetime access · 10 Key Licenses · XAUUSD + BTC',
+            'name' => 'Unlimited',
+            'product_name' => 'Tradivo Magic EA V12 — Unlimited',
+            'access_duration' => 'Lifetime Access',
             'amount' => 799,
             'old_amount' => 999,
+            'features' => [
+                '10 Key Licenses',
+                'XAUUSD + BTC',
+                'Lifetime Updates',
+                'Priority Support',
+                'Full Premium Access',
+            ],
+            'badge' => 'best_value',
         ],
     ],
 ];

@@ -16,11 +16,11 @@ class CheckoutController extends Controller
 {
     public function show(Request $request): Response
     {
-        $planSlug = $this->resolvePlan($request->query('plan'));
-        $plan = config("plans.lookup.{$planSlug}");
+        $plan = Setting::pricingPlan($request->query('plan'));
+        abort_unless($plan, 404);
 
         return Inertia::render('checkout/index', [
-            'planSlug' => $planSlug,
+            'planSlug' => $plan['slug'],
             'plan' => $plan,
             'paymentFeeRates' => Setting::paymentFeeRates(),
             'cryptoWallets' => CryptoWallet::active()
@@ -44,8 +44,10 @@ class CheckoutController extends Controller
             'promoCode' => ['nullable', 'string', 'max:50'],
         ]);
 
-        $planSlug = $this->resolvePlan($data['plan']);
-        $plan = config("plans.lookup.{$planSlug}");
+        $plan = Setting::pricingPlan($data['plan']);
+        abort_unless($plan, 404);
+
+        $planSlug = $plan['slug'];
         $paymentMethod = $data['paymentMethod'] ?? 'stripe';
         $feeRate = Setting::paymentFeeRateFor($paymentMethod);
 
@@ -82,7 +84,7 @@ class CheckoutController extends Controller
                     'currency' => 'usd',
                     'unit_amount' => $totalCents,
                     'product_data' => [
-                        'name' => $plan['name'],
+                        'name' => $plan['product_name'],
                         'description' => "{$plan['subtitle']} · Includes {$feeLabel} card payment fee",
                     ],
                 ],
@@ -135,13 +137,6 @@ class CheckoutController extends Controller
     public function cancel(): Response
     {
         return Inertia::render('checkout/cancel');
-    }
-
-    private function resolvePlan(?string $slug): string
-    {
-        $lookup = config('plans.lookup');
-
-        return $slug && array_key_exists($slug, $lookup) ? $slug : 'pro';
     }
 
     private function resolveCoupon(?string $code): ?Coupon

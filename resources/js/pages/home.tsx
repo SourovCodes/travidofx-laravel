@@ -5,6 +5,7 @@ import Footer from '@/components/Footer';
 import Header from '@/components/Header';
 import Hero from '@/components/Hero';
 import Pricing from '@/components/Pricing';
+import type { PricingPackage } from '@/components/Pricing';
 import {
     ContactCta,
     Description,
@@ -18,14 +19,16 @@ import {
     Testimonials,
     WhyChoose,
 } from '@/components/Sections';
-import type { Review } from '@/components/Sections';
+import type { ResultLinks, Review } from '@/components/Sections';
 import { FanBand, TiltBand } from '@/components/Shape';
 
 type Props = {
+    resultLinks: ResultLinks;
+    pricingPackages: PricingPackage[];
     reviews: Review[];
 };
 
-export default function Home({ reviews }: Props) {
+export default function Home({ resultLinks, pricingPackages, reviews }: Props) {
     return (
         <>
             <Head title="Tradivo Magic EA V12 — Advanced Gold & BTC Expert Advisor for MT5">
@@ -41,18 +44,18 @@ export default function Home({ reviews }: Props) {
                 <TiltBand />
                 <Description />
                 <ResultsHeader source="Myfxbook V3.9" />
-                <Results />
+                <Results links={resultLinks} />
                 <WhyChoose />
                 <FanBand />
                 <PricingBanner />
-                <Pricing />
+                <Pricing packages={pricingPackages} />
                 <FanBand />
                 <Installation />
                 <FxBlueHeader />
                 <FxBlueWidget />
                 <FanBand />
                 <PricingBanner />
-                <Pricing />
+                <Pricing packages={pricingPackages} />
                 <FanBand />
                 <Faq />
                 <Testimonials reviews={reviews} />

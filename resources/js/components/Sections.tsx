@@ -223,6 +223,17 @@ export function Description() {
 
 /* -------------------- Results header + cards -------------------- */
 
+export type ResultLinks = {
+    balanced: string;
+    aggressive: string;
+};
+
+const DEFAULT_RESULT_LINKS: ResultLinks = {
+    balanced: 'https://www.myfxbook.com/members/Tradivorobot/tradivorobot/12044419',
+    aggressive:
+        'https://www.myfxbook.com/members/Tradivorobot/tradivo-magic-ea/12044405',
+};
+
 export function ResultsHeader({
     source = 'Myfxbook V3.9',
 }: {
@@ -247,7 +258,11 @@ export function ResultsHeader({
     );
 }
 
-export function Results() {
+export function Results({
+    links = DEFAULT_RESULT_LINKS,
+}: {
+    links?: ResultLinks;
+}) {
     return (
         <section className="relative bg-black pb-16 md:pb-24">
             <div className="container-x grid gap-10 lg:grid-cols-2">
@@ -255,13 +270,13 @@ export function Results() {
                     title="Tradivo Magic EA V12 — Balanced Mode"
                     body="Designed for consistent monthly growth potential with strict risk control and intelligent trade management."
                     img="/img/v12-balance.png"
-                    href="https://www.myfxbook.com/members/Tradivorobot/tradivorobot/12044419"
+                    href={links.balanced}
                 />
                 <ResultCard
                     title="Tradivo Magic EA V12 — Aggressive Mode"
                     body="Designed for high-profit performance — stronger lot scaling, up to 50% monthly returns with faster basket cycles."
                     img="/img/v10-agreesive.png"
-                    href="https://www.myfxbook.com/members/Tradivorobot/tradivo-magic-ea/12044405"
+                    href={links.aggressive}
                 />
             </div>
         </section>

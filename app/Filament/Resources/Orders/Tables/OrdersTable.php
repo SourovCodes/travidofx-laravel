@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Orders\Tables;
 
 use App\Models\Order;
+use App\Models\Setting;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -77,8 +78,8 @@ class OrdersTable
                     ]),
                 SelectFilter::make('plan_slug')
                     ->label('Plan')
-                    ->options(collect(config('plans.lookup'))
-                        ->mapWithKeys(fn ($plan, $slug) => [$slug => $plan['name']])
+                    ->options(collect(Setting::pricingPlanLookup())
+                        ->mapWithKeys(fn (array $plan, string $slug): array => [$slug => $plan['name']])
                         ->all()),
             ])
             ->recordActions([])

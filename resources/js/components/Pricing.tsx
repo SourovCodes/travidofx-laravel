@@ -2,86 +2,29 @@ import { Link } from '@inertiajs/react';
 import Reveal from '@/components/Reveal';
 
 type Plan = {
+    slug: string;
     name: string;
-    subtitle: string;
-    priceNow: number;
-    priceOld?: number;
-    blurb: string;
+    accessDuration: string;
+    amount: number;
+    oldAmount: number;
     features: string[];
-    cta: { label: string; href: string };
-    ribbon?: { label: string; tone: 'popular' | 'best' };
+    badge?: 'popular' | 'best_value' | null;
 };
 
-const PLANS: Plan[] = [
-    {
-        name: 'Basic',
-        subtitle: '3 Months Access',
-        priceNow: 149,
-        priceOld: 199,
-        blurb: '3 Months License',
-        features: [
-            '1 Key License',
-            'XAUUSD Support',
-            'Help & Support',
-            'Free Updates',
-        ],
-        cta: { label: 'Get it Now', href: '/checkout?plan=basic' },
-    },
-    {
-        name: 'Pro',
-        subtitle: '1 Year Access',
-        priceNow: 299,
-        priceOld: 399,
-        blurb: '1 Year License',
-        features: [
-            '3 Key Licenses',
-            'XAUUSD Support',
-            'Priority Support',
-            'Free Updates',
-        ],
-        cta: { label: 'Get it Now', href: '/checkout?plan=pro' },
-        ribbon: { label: 'Popular', tone: 'popular' },
-    },
-    {
-        name: 'Master',
-        subtitle: '1 Year Access',
-        priceNow: 499,
-        priceOld: 699,
-        blurb: '1 Year License',
-        features: [
-            '5 Key Licenses',
-            'XAUUSD + BTC',
-            'Premium Support',
-            'Advanced Features',
-            'Free Updates',
-        ],
-        cta: { label: 'Get it Now', href: '/checkout?plan=master' },
-    },
-    {
-        name: 'Unlimited',
-        subtitle: 'Lifetime Access',
-        priceNow: 799,
-        priceOld: 999,
-        blurb: 'Lifetime License',
-        features: [
-            '10 Key Licenses',
-            'XAUUSD + BTC',
-            'Lifetime Updates',
-            'Priority Support',
-            'Full Premium Access',
-        ],
-        cta: { label: 'Get it Now', href: '/checkout?plan=unlimited' },
-        ribbon: { label: 'Best Value', tone: 'best' },
-    },
-];
+export type PricingPackage = Plan;
 
-export default function Pricing() {
+const BADGES = {
+    popular: { label: 'Popular', tone: 'popular' },
+    best_value: { label: 'Best Value', tone: 'best' },
+} satisfies Record<string, { label: string; tone: 'popular' | 'best' }>;
+
+export default function Pricing({ packages }: { packages: PricingPackage[] }) {
     return (
         <section id="prices" className="relative bg-black pb-20 md:pb-24">
             <div className="container-x">
-                <div className="grid items-start gap-6 md:grid-cols-2 lg:grid-cols-4 lg:gap-5">
-                    {PLANS.map((plan, i) => (
-                        <Reveal key={plan.name} delay={i * 80}>
+                <div className={pricingGridClass(packages.length)}>
+                    {packages.map((plan, i) => (
+                        <Reveal key={plan.slug} delay={i * 80}>
                             <PlanCard plan={plan} />
                         </Reveal>
                     ))}
@@ -97,9 +40,12 @@ export default function Pricing() {
 }
 
 function PlanCard({ plan }: { plan: Plan }) {
+    const ribbon = plan.badge ? BADGES[plan.badge] : null;
+    const hasOldPrice = plan.oldAmount > plan.amount;
+
     return (
         <div className="relative overflow-hidden rounded-sm bg-card shadow-[0_22px_50px_-25px_rgba(0,0,0,0.65)]">
-            {plan.ribbon && (
+            {ribbon && (
                 <div
                     className="pointer-events-none absolute top-0 right-0 z-10 h-[150px] w-[150px] overflow-hidden"
                     style={{ transform: 'rotate(90deg)' }}
@@ -114,12 +60,12 @@ function PlanCard({ plan }: { plan: Plan }) {
                             transform:
                                 'translateY(-50%) translateX(-50%) translateX(35px) rotate(-45deg)',
                             background:
-                                plan.ribbon.tone === 'popular'
+                                ribbon.tone === 'popular'
                                     ? '#003D08'
                                     : '#AE8348',
                         }}
                     >
-                        {plan.ribbon.label}
+                        {ribbon.label}
                     </div>
                 </div>
             )}
@@ -129,16 +75,16 @@ function PlanCard({ plan }: { plan: Plan }) {
                     {plan.name}
                 </h3>
                 <p className="mt-1 text-[13px] text-white/85">
-                    {plan.subtitle}
+                    {plan.accessDuration}
                 </p>
             </div>
 
             <div className="px-5 pt-10 pb-6 text-center text-white">
                 <div className="flex flex-wrap items-center justify-center gap-x-3 leading-none">
-                    {plan.priceOld && (
+                    {hasOldPrice && (
                         <span className="mb-2 self-end font-display text-[1.05rem] font-normal text-white/70 line-through">
                             <span className="mr-px">$</span>
-                            {plan.priceOld}
+                            {formatPrice(plan.oldAmount)}
                         </span>
                     )}
                     <span className="inline-flex items-baseline">
@@ -146,11 +92,13 @@ function PlanCard({ plan }: { plan: Plan }) {
                             $
                         </span>
                         <span className="font-display text-[65px] leading-[0.8] font-extrabold">
-                            {plan.priceNow}
+                            {formatPrice(plan.amount)}
                         </span>
                     </span>
                 </div>
-                <p className="mt-3 text-[13px] text-white/85">{plan.blurb}</p>
+                <p className="mt-3 text-[13px] text-white/85">
+                    {plan.accessDuration}
+                </p>
             </div>
 
             <ul className="px-5 pb-7">
@@ -185,10 +133,33 @@ function PlanCard({ plan }: { plan: Plan }) {
             </ul>
 
             <div className="flex justify-center px-5 pb-8">
-                <Link href={plan.cta.href} className="btn-elementor">
-                    {plan.cta.label}
+                <Link
+                    href={`/checkout?plan=${encodeURIComponent(plan.slug)}`}
+                    className="btn-elementor"
+                >
+                    Get it Now
                 </Link>
             </div>
         </div>
     );
+}
+
+function pricingGridClass(count: number) {
+    if (count <= 1) {
+        return 'mx-auto grid max-w-sm items-start gap-6';
+    }
+
+    if (count === 2) {
+        return 'mx-auto grid max-w-3xl items-start gap-6 md:grid-cols-2';
+    }
+
+    if (count === 3) {
+        return 'grid items-start gap-6 md:grid-cols-2 lg:grid-cols-3';
+    }
+
+    return 'grid items-start gap-6 md:grid-cols-2 lg:grid-cols-4 lg:gap-5';
+}
+
+function formatPrice(amount: number) {
+    return Number.isInteger(amount) ? `${amount}` : amount.toFixed(2);
 }

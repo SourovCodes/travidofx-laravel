@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Coupon;
+use App\Models\Setting;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -15,8 +16,8 @@ class CouponController extends Controller
             'plan' => ['nullable', 'string', 'max:50'],
         ]);
 
-        $planSlug = $this->resolvePlan($data['plan'] ?? null);
-        $plan = config("plans.lookup.{$planSlug}");
+        $plan = Setting::pricingPlan($data['plan'] ?? null);
+        abort_unless($plan, 404);
 
         $coupon = Coupon::active()
             ->whereRaw('UPPER(code) = ?', [strtoupper(trim($data['code']))])
@@ -38,12 +39,5 @@ class CouponController extends Controller
             'discountType' => $coupon->discount_type,
             'discountValue' => (float) $coupon->discount_value,
         ]);
-    }
-
-    private function resolvePlan(?string $slug): string
-    {
-        $lookup = config('plans.lookup');
-
-        return $slug && array_key_exists($slug, $lookup) ? $slug : 'pro';
     }
 }
