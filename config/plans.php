@@ -45,7 +45,7 @@ return [
             'old_amount' => 699,
             'features' => [
                 '5 Key Licenses',
-                'XAUUSD + BTC',
+                'XAUUSD Support',
                 'Premium Support',
                 'Advanced Features',
                 'Free Updates',
@@ -60,7 +60,7 @@ return [
             'old_amount' => 999,
             'features' => [
                 '10 Key Licenses',
-                'XAUUSD + BTC',
+                'XAUUSD Support',
                 'Lifetime Updates',
                 'Priority Support',
                 'Full Premium Access',

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Coupon;
-use App\Models\CryptoWallet;
 use App\Models\Order;
 use App\Models\Setting;
 use Illuminate\Http\Request;
@@ -23,11 +22,6 @@ class CheckoutController extends Controller
             'planSlug' => $plan['slug'],
             'plan' => $plan,
             'paymentFeeRates' => Setting::paymentFeeRates(),
-            'cryptoWallets' => CryptoWallet::active()
-                ->orderBy('sort_order')
-                ->orderBy('id')
-                ->get(['key', 'asset', 'network', 'address'])
-                ->values(),
         ]);
     }
 
@@ -40,7 +34,7 @@ class CheckoutController extends Controller
             'lastName' => ['required', 'string', 'max:80'],
             'country' => ['required', 'string', 'max:80'],
             'additionalInfo' => ['nullable', 'string', 'max:500'],
-            'paymentMethod' => ['nullable', 'string', 'max:20'],
+            'paymentMethod' => ['nullable', 'string', 'in:stripe,skrill,payoneer'],
             'promoCode' => ['nullable', 'string', 'max:50'],
         ]);
 

@@ -104,15 +104,14 @@ export function Description() {
                     <h6 className="font-display text-[clamp(1rem,0.7vw+.6rem,1.15rem)] leading-tight font-bold tracking-[0.18em] text-shape uppercase">
                         Tradivo Magic EA V12
                         <br />
-                        Advanced Gold &amp; BTC Expert Advisor MT5
+                        Advanced Gold Expert Advisor MT5
                     </h6>
 
                     <div className="mt-7 space-y-5 text-[15px] leading-[1.75] text-white/85">
                         <p>
-                            A powerful multi-asset Expert Advisor built for
-                            XAUUSD &amp; BTCUSD traders who want intelligent
-                            automation, controlled recovery logic, and stable
-                            basket management.
+                            A powerful Expert Advisor built for XAUUSD traders
+                            who want intelligent automation, controlled recovery
+                            logic, and stable basket management.
                         </p>
                         <p>
                             Tradivo Magic EA V12 combines HTF trend filtering,
@@ -157,7 +156,7 @@ export function Description() {
                             <ul className="mt-3 space-y-2">
                                 {[
                                     'Full MT5 Expert Advisor package',
-                                    'Gold (XAUUSD) + BTCUSD support',
+                                    'Gold (XAUUSD) support',
                                     'Smart counter-trend grid system',
                                     'HTF EMA trend filtering built in',
                                     'Advanced recovery & basket management',
@@ -770,7 +769,7 @@ export function ContactCta() {
             <div className="container-x mt-14 grid items-start gap-10 lg:grid-cols-2">
                 <Reveal>
                     <h3 className="font-display text-[clamp(1.6rem,2vw+.5rem,2.2rem)] font-medium text-white">
-                        Ready to Automate Your Gold &amp; BTC Trading?
+                        Ready to Automate Your Gold Trading?
                     </h3>
                     <p className="mt-4 max-w-xl leading-[1.7] text-white/80">
                         Discover what Tradivo Magic EA V12 can do for your

@@ -5,7 +5,6 @@ import FloatingWhatsApp from '@/components/FloatingWhatsApp';
 import Footer from '@/components/Footer';
 import Header from '@/components/Header';
 import PaymentOptions from '@/components/PaymentOptions';
-import type { CryptoWallet } from '@/components/PaymentOptions';
 import {
     DEFAULT_FEE_RATES,
     formatMoney,
@@ -27,7 +26,6 @@ type Props = {
     planSlug: string;
     plan: Plan;
     paymentFeeRates: FeeRates;
-    cryptoWallets: CryptoWallet[];
 };
 
 type CheckoutForm = {
@@ -51,7 +49,6 @@ export default function Checkout({
     planSlug,
     plan,
     paymentFeeRates = DEFAULT_FEE_RATES,
-    cryptoWallets,
 }: Props) {
     const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('stripe');
     const [promoStatus, setPromoStatus] = useState<PromoStatus>('idle');
@@ -159,9 +156,9 @@ export default function Checkout({
                             Complete Your Order
                         </h1>
                         <p className="section-subtitle mt-3">
-                            You&apos;re seconds away from automated XAUUSD &amp;
-                            BTCUSD trading on MT5. License keys and download
-                            links are emailed instantly.
+                            You&apos;re seconds away from automated XAUUSD
+                            trading on MT5. License keys and download links are
+                            emailed instantly.
                         </p>
                     </div>
                 </section>
@@ -284,7 +281,6 @@ export default function Checkout({
                                     onMethodChange={handleMethodChange}
                                     feeRates={paymentFeeRates}
                                     processing={processing}
-                                    cryptoWallets={cryptoWallets}
                                 />
                             </fieldset>
                         </form>

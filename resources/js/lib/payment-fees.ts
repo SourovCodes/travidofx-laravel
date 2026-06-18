@@ -4,7 +4,7 @@ export const FEE_METHODS = ['stripe', 'skrill', 'payoneer'] as const;
 
 export type FeeMethod = (typeof FEE_METHODS)[number];
 
-export type PaymentMethod = FeeMethod | 'crypto';
+export type PaymentMethod = FeeMethod;
 
 export type FeeRates = Record<FeeMethod, number>;
 

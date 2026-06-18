@@ -16,6 +16,8 @@ class Setting extends Model
 
     public const PRICING_BADGE_BEST_VALUE = 'best_value';
 
+    public const PRIVACY_POLICY = 'privacy_policy';
+
     /** @var array<string, string> */
     public const PRICING_BADGE_OPTIONS = [
         self::PRICING_BADGE_POPULAR => 'Popular',
@@ -109,6 +111,25 @@ class Setting extends Model
         }
 
         return $rates;
+    }
+
+    public static function privacyPolicyMarkdown(): string
+    {
+        $stored = self::get(self::PRIVACY_POLICY);
+
+        if (is_string($stored) && trim($stored) !== '') {
+            return $stored;
+        }
+
+        return (string) config('legal.privacy_policy.markdown', '');
+    }
+
+    public static function privacyPolicyHtml(): string
+    {
+        return Str::markdown(self::privacyPolicyMarkdown(), [
+            'html_input' => 'strip',
+            'allow_unsafe_links' => false,
+        ]);
     }
 
     /**

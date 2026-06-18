@@ -42,7 +42,7 @@ class CheckoutSettings extends Page implements HasForms
         return $schema
             ->components([
                 Section::make('Payment processing fees')
-                    ->description('Set the fee percentage added on top of each non-crypto payment method shown at checkout.')
+                    ->description('Set the fee percentage added on top of each manual payment method shown at checkout.')
                     ->columns(3)
                     ->components([
                         self::percentInput('stripe_fee_percent', 'Card (Stripe) fee (%)'),

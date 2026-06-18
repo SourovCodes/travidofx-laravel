@@ -31,10 +31,10 @@ type Props = {
 export default function Home({ resultLinks, pricingPackages, reviews }: Props) {
     return (
         <>
-            <Head title="Tradivo Magic EA V12 — Advanced Gold & BTC Expert Advisor for MT5">
+            <Head title="Tradivo Magic EA V12 — Advanced Gold Expert Advisor for MT5">
                 <meta
                     name="description"
-                    content="Tradivo Magic EA V12 — automated XAUUSD & BTCUSD trading on MT5 with HTF trend filtering, counter-trend grid execution, recovery protection, and smart basket profit targeting."
+                    content="Tradivo Magic EA V12 — automated XAUUSD trading on MT5 with HTF trend filtering, counter-trend grid execution, recovery protection, and smart basket profit targeting."
                 />
             </Head>
             <Header />

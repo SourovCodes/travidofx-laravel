@@ -16,13 +16,12 @@ const SLIDES: Slide[] = [
                 {' '}
                 Magic EA V12
                 <br />
-                for Gold &amp; Bitcoin
+                for Gold Trading
             </>
         ),
         body: (
             <>
-                Automated <strong>XAUUSD &amp; BTCUSD</strong> trading on MT5
-                with
+                Automated <strong>XAUUSD</strong> trading on MT5 with
                 <br />
                 <strong>HTF trend filtering</strong>,{' '}
                 <strong>counter-trend grid execution</strong>, and
@@ -54,13 +53,12 @@ const SLIDES: Slide[] = [
         ),
     },
     {
-        sub: 'Built for Dual Assets',
+        sub: 'Built for Gold Markets',
         firstWord: 'Gold',
-        titleRest: <> &amp; BTC, One EA</>,
+        titleRest: <> Automation, One EA</>,
         body: (
             <>
-                Optimized for <strong>XAUUSD</strong> and{' '}
-                <strong>BTCUSD</strong> on the
+                Optimized for <strong>XAUUSD</strong> on the
                 <br />
                 <strong>1M timeframe</strong>. Choose Balanced, Aggressive,
                 <br />

@@ -41,7 +41,7 @@ const ITEMS_RIGHT: Item[] = [
     },
     {
         q: 'Which pair / timeframe works better for this Forex Trading Bot?',
-        a: "It will run on XAUUSD/BTCUSD type symbols and the 1M timeframe — that's where the results come from.",
+        a: "It will run on XAUUSD type symbols and the 1M timeframe — that's where the results come from.",
     },
     {
         q: 'Where can I download the latest version?',
@@ -49,7 +49,7 @@ const ITEMS_RIGHT: Item[] = [
     },
     {
         q: 'Is Tradivo Magic EA available for MetaTrader 4?',
-        a: 'No. Tradivo Magic EA V12 is built exclusively for MetaTrader 5 and supports both XAUUSD and BTCUSD.',
+        a: 'No. Tradivo Magic EA V12 is built exclusively for MetaTrader 5 and is tuned for XAUUSD.',
     },
     {
         q: 'Any other questions?',

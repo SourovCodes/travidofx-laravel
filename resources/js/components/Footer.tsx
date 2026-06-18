@@ -138,11 +138,11 @@ export default function Footer() {
                     </h2>
                     <p className="mt-5 text-[15px] leading-[1.75] text-white/80">
                         Discover the edge in automated trading with Tradivo
-                        Magic EA V12 — an advanced Gold &amp; BTC Expert Advisor
-                        for MT5. HTF trend filtering, counter-trend grid
-                        execution, recovery protection, and smart basket profit
-                        targeting in one disciplined algorithmic system. Powered
-                        by Tradivo FX Limited.
+                        Magic EA V12 — an advanced Gold Expert Advisor for MT5.
+                        HTF trend filtering, counter-trend grid execution,
+                        recovery protection, and smart basket profit targeting
+                        in one disciplined algorithmic system. Powered by
+                        Tradivo FX Limited.
                     </p>
 
                     <div className="mt-10 flex justify-center">
