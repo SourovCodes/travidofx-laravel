@@ -1,7 +1,7 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import type { FormEvent } from 'react';
 import { useState } from 'react';
-import FloatingWhatsApp from '@/components/FloatingWhatsApp';
+import FloatingContactButtons from '@/components/FloatingContactButtons';
 import Footer from '@/components/Footer';
 import Header from '@/components/Header';
 import PaymentOptions from '@/components/PaymentOptions';
@@ -379,7 +379,7 @@ export default function Checkout({
                 </section>
             </main>
             <Footer />
-            <FloatingWhatsApp />
+            <FloatingContactButtons />
         </>
     );
 }

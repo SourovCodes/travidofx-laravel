@@ -1,9 +1,11 @@
-import { Head, Link } from '@inertiajs/react';
-import FloatingWhatsApp from '@/components/FloatingWhatsApp';
+import { Head, Link, usePage } from '@inertiajs/react';
+import FloatingContactButtons from '@/components/FloatingContactButtons';
 import Footer from '@/components/Footer';
 import Header from '@/components/Header';
 
 export default function CheckoutSuccess({ sessionId }: { sessionId?: string }) {
+    const { contact } = usePage().props;
+
     return (
         <>
             <Head title="Thank You — Tradivo Magic EA V12" />
@@ -51,7 +53,7 @@ export default function CheckoutSuccess({ sessionId }: { sessionId?: string }) {
                                 Back to home
                             </Link>
                             <a
-                                href="https://wa.me/14075617294"
+                                href={contact.whatsapp.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="btn-elementor"
@@ -63,7 +65,7 @@ export default function CheckoutSuccess({ sessionId }: { sessionId?: string }) {
                 </section>
             </main>
             <Footer />
-            <FloatingWhatsApp />
+            <FloatingContactButtons />
         </>
     );
 }

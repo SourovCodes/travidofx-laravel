@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import FloatingWhatsApp from '@/components/FloatingWhatsApp';
+import FloatingContactButtons from '@/components/FloatingContactButtons';
 import Footer from '@/components/Footer';
 import Header from '@/components/Header';
 
@@ -52,7 +52,7 @@ export default function CheckoutCancel() {
                 </section>
             </main>
             <Footer />
-            <FloatingWhatsApp />
+            <FloatingContactButtons />
         </>
     );
 }

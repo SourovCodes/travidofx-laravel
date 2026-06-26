@@ -18,6 +18,14 @@ class Setting extends Model
 
     public const PRIVACY_POLICY = 'privacy_policy';
 
+    public const CONTACT_WHATSAPP_NUMBER = 'contact_whatsapp_number';
+
+    public const CONTACT_TELEGRAM_URL = 'contact_telegram_url';
+
+    public const DEFAULT_WHATSAPP_NUMBER = '14075617294';
+
+    public const DEFAULT_TELEGRAM_URL = 'https://t.me/tradivorobot';
+
     /** @var array<string, string> */
     public const PRICING_BADGE_OPTIONS = [
         self::PRICING_BADGE_POPULAR => 'Popular',
@@ -130,6 +138,69 @@ class Setting extends Model
             'html_input' => 'strip',
             'allow_unsafe_links' => false,
         ]);
+    }
+
+    /**
+     * @return array{
+     *     whatsapp: array{number: string, url: string},
+     *     telegram: array{url: string}
+     * }
+     */
+    public static function contactLinks(): array
+    {
+        $whatsappNumber = self::whatsappNumber();
+
+        return [
+            'whatsapp' => [
+                'number' => $whatsappNumber,
+                'url' => "https://wa.me/{$whatsappNumber}",
+            ],
+            'telegram' => [
+                'url' => self::telegramUrl(),
+            ],
+        ];
+    }
+
+    public static function whatsappNumber(): string
+    {
+        return self::normalizeWhatsappNumber(
+            self::get(self::CONTACT_WHATSAPP_NUMBER, self::DEFAULT_WHATSAPP_NUMBER),
+        );
+    }
+
+    public static function telegramUrl(): string
+    {
+        return self::normalizeTelegramUrl(
+            self::get(self::CONTACT_TELEGRAM_URL, self::DEFAULT_TELEGRAM_URL),
+        );
+    }
+
+    public static function normalizeWhatsappNumber(mixed $number): string
+    {
+        $normalized = preg_replace('/\D+/', '', (string) $number) ?? '';
+
+        return $normalized !== '' ? $normalized : self::DEFAULT_WHATSAPP_NUMBER;
+    }
+
+    public static function normalizeTelegramUrl(mixed $value): string
+    {
+        $value = trim((string) $value);
+
+        if ($value === '') {
+            return self::DEFAULT_TELEGRAM_URL;
+        }
+
+        if (Str::startsWith($value, ['http://', 'https://'])) {
+            return $value;
+        }
+
+        $value = ltrim($value, '@/');
+
+        if (Str::startsWith($value, ['t.me/', 'telegram.me/'])) {
+            return "https://{$value}";
+        }
+
+        return "https://t.me/{$value}";
     }
 
     /**

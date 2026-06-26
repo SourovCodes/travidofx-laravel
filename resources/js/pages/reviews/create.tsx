@@ -1,6 +1,6 @@
 import { Head, useForm, usePage } from '@inertiajs/react';
 import type { FormEvent } from 'react';
-import FloatingWhatsApp from '@/components/FloatingWhatsApp';
+import FloatingContactButtons from '@/components/FloatingContactButtons';
 import Footer from '@/components/Footer';
 import Header from '@/components/Header';
 import type { Flash } from '@/types';
@@ -184,7 +184,7 @@ export default function ReviewsCreate() {
                 </section>
             </main>
             <Footer />
-            <FloatingWhatsApp />
+            <FloatingContactButtons />
         </>
     );
 }

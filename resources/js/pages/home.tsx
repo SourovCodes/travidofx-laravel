@@ -1,6 +1,6 @@
 import { Head } from '@inertiajs/react';
 import Faq from '@/components/Faq';
-import FloatingWhatsApp from '@/components/FloatingWhatsApp';
+import FloatingContactButtons from '@/components/FloatingContactButtons';
 import Footer from '@/components/Footer';
 import Header from '@/components/Header';
 import Hero from '@/components/Hero';
@@ -63,7 +63,7 @@ export default function Home({ resultLinks, pricingPackages, reviews }: Props) {
                 <TiltBand />
             </main>
             <Footer />
-            <FloatingWhatsApp />
+            <FloatingContactButtons />
         </>
     );
 }

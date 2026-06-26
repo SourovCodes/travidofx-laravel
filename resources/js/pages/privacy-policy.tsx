@@ -1,5 +1,5 @@
 import { Head } from '@inertiajs/react';
-import FloatingWhatsApp from '@/components/FloatingWhatsApp';
+import FloatingContactButtons from '@/components/FloatingContactButtons';
 import Footer from '@/components/Footer';
 import Header from '@/components/Header';
 import { TiltBand } from '@/components/Shape';
@@ -42,7 +42,7 @@ export default function PrivacyPolicy({ privacyPolicyHtml }: Props) {
                 </section>
             </main>
             <Footer />
-            <FloatingWhatsApp />
+            <FloatingContactButtons />
         </>
     );
 }
