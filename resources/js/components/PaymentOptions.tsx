@@ -1,4 +1,5 @@
 import { usePage } from '@inertiajs/react';
+import { useState } from 'react';
 import {
     TelegramIcon,
     WhatsAppIcon,
@@ -13,12 +14,33 @@ import {
 } from '@/lib/payment-fees';
 import type { FeeRates, PaymentMethod } from '@/lib/payment-fees';
 
+export type CryptoWallet = {
+    key: string;
+    asset: string;
+    network: string;
+    address: string;
+};
+
 function formatPercent(value: number) {
     return Number.isInteger(value) ? `${value}%` : `${value.toFixed(2)}%`;
 }
 
 function whatsappLink(url: string, message: string) {
     return `${url}?text=${encodeURIComponent(message)}`;
+}
+
+function cryptoSubtitle(wallets: CryptoWallet[]) {
+    if (wallets.length === 0) {
+        return 'Currently unavailable';
+    }
+
+    const labels = wallets.map((w) =>
+        w.network ? `${w.asset} (${w.network})` : w.asset,
+    );
+
+    return labels.length <= 3
+        ? labels.join(', ')
+        : `${labels.slice(0, 3).join(', ')} + ${labels.length - 3} more`;
 }
 
 export default function PaymentOptions({
@@ -29,6 +51,7 @@ export default function PaymentOptions({
     onMethodChange,
     feeRates = DEFAULT_FEE_RATES,
     processing = false,
+    cryptoWallets = [],
 }: {
     amount: number;
     productName: string;
@@ -37,8 +60,14 @@ export default function PaymentOptions({
     onMethodChange: (method: PaymentMethod) => void;
     feeRates?: FeeRates;
     processing?: boolean;
+    cryptoWallets?: CryptoWallet[];
 }) {
     const { contact } = usePage().props;
+    const [coinKey, setCoinKey] = useState<string>(
+        cryptoWallets[0]?.key ?? '',
+    );
+    const activeCoin =
+        cryptoWallets.find((c) => c.key === coinKey) ?? cryptoWallets[0];
     const fee = getExtraFee(amount, method, feeRates);
     const total = getTotalWithFee(amount, method, feeRates);
     const feePercentLabel = formatPercent(getRate(feeRates, method) * 100);
@@ -70,6 +99,43 @@ export default function PaymentOptions({
                     </span>
                 }
             />
+
+            <MethodRow
+                value="crypto"
+                method={method}
+                onChange={onMethodChange}
+                title="Crypto"
+                subtitle={cryptoSubtitle(cryptoWallets)}
+                trailing={
+                    cryptoWallets.length > 0 ? (
+                        <span className="font-display text-[11px] font-bold tracking-widest text-shape uppercase">
+                            {cryptoWallets.length}{' '}
+                            {cryptoWallets.length === 1
+                                ? 'network'
+                                : 'networks'}
+                        </span>
+                    ) : null
+                }
+            >
+                {method === 'crypto' && activeCoin && (
+                    <CryptoPaymentBlock
+                        amount={amount}
+                        productName={productName}
+                        wallets={cryptoWallets}
+                        activeWallet={activeCoin}
+                        onWalletChange={setCoinKey}
+                        whatsappUrl={contact.whatsapp.url}
+                        telegramUrl={contact.telegram.url}
+                    />
+                )}
+                {method === 'crypto' && !activeCoin && (
+                    <div className="mt-4 rounded-xl border border-white/10 bg-black/30 p-4 text-sm text-white/70">
+                        Crypto payments are temporarily unavailable. Please
+                        choose another payment method or contact us on WhatsApp
+                        or Telegram.
+                    </div>
+                )}
+            </MethodRow>
 
             <MethodRow
                 value="skrill"
@@ -169,6 +235,92 @@ export default function PaymentOptions({
     );
 }
 
+function CryptoPaymentBlock({
+    amount,
+    productName,
+    wallets,
+    activeWallet,
+    onWalletChange,
+    whatsappUrl,
+    telegramUrl,
+}: {
+    amount: number;
+    productName: string;
+    wallets: CryptoWallet[];
+    activeWallet: CryptoWallet;
+    onWalletChange: (key: string) => void;
+    whatsappUrl: string;
+    telegramUrl: string;
+}) {
+    const proofMessage = `Hi! I've paid for ${productName} ($${formatMoney(amount)}) using ${activeWallet.asset} on ${activeWallet.network}. Transaction hash: `;
+
+    return (
+        <div className="mt-4 space-y-4 rounded-xl border border-white/10 bg-black/30 p-4">
+            <div className="grid grid-cols-2 gap-2">
+                {wallets.map((wallet) => (
+                    <button
+                        key={wallet.key}
+                        type="button"
+                        onClick={() => onWalletChange(wallet.key)}
+                        className={`rounded-lg border px-3 py-2.5 text-left transition-colors ${
+                            activeWallet.key === wallet.key
+                                ? 'border-shape bg-shape/10'
+                                : 'border-white/10 bg-white/[0.03] hover:border-shape/40'
+                        }`}
+                    >
+                        <div className="font-display text-sm font-bold text-white">
+                            {wallet.asset}
+                        </div>
+                        <div className="text-[11px] text-white/60">
+                            {wallet.network}
+                        </div>
+                    </button>
+                ))}
+            </div>
+
+            <div className="rounded-lg border border-white/10 bg-white/[0.04] p-3.5">
+                <div className="flex items-baseline justify-between gap-3">
+                    <span className="font-display text-[11px] font-bold tracking-widest text-white/60 uppercase">
+                        Send exactly
+                    </span>
+                    <span className="font-display text-base font-extrabold text-white">
+                        ${formatMoney(amount)} in {activeWallet.asset}
+                    </span>
+                </div>
+                <div className="mt-2 font-display text-[11px] font-bold tracking-widest text-white/60 uppercase">
+                    {activeWallet.network} address
+                </div>
+                <AddressRow address={activeWallet.address} />
+                <p className="mt-3 text-[12px] leading-relaxed text-white/65">
+                    After sending, share the transaction hash so we can activate
+                    your license.
+                </p>
+            </div>
+
+            <div className="grid gap-2 sm:grid-cols-2">
+                <a
+                    href={whatsappLink(whatsappUrl, proofMessage)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-primary inline-flex w-full items-center justify-center gap-2 !py-3.5 text-sm"
+                >
+                    <WhatsAppIcon />
+                    Send Proof on WhatsApp
+                </a>
+                <a
+                    href={telegramUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[#229ED9]/60 bg-[#229ED9]/15 px-6 py-3.5 font-display text-sm font-bold text-white transition-colors hover:bg-[#229ED9]/25"
+                >
+                    <TelegramIcon />
+                    Send Proof on Telegram
+                </a>
+            </div>
+        </div>
+    );
+}
+
 function MethodRow({
     value,
     method,
@@ -218,6 +370,34 @@ function MethodRow({
                 {trailing}
             </label>
             {children && <div className="px-4 pb-4">{children}</div>}
+        </div>
+    );
+}
+
+function AddressRow({ address }: { address: string }) {
+    const [copied, setCopied] = useState(false);
+    const copy = async () => {
+        try {
+            await navigator.clipboard.writeText(address);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 1500);
+        } catch {
+            /* Clipboard is unavailable in some browser contexts. */
+        }
+    };
+
+    return (
+        <div className="mt-1 flex items-center gap-2 rounded-md border border-white/10 bg-black/40 px-3 py-2">
+            <code className="flex-1 truncate font-mono text-[12px] text-white">
+                {address}
+            </code>
+            <button
+                type="button"
+                onClick={copy}
+                className="shrink-0 font-display text-[11px] font-bold tracking-widest text-shape uppercase hover:opacity-80"
+            >
+                {copied ? 'Copied' : 'Copy'}
+            </button>
         </div>
     );
 }
