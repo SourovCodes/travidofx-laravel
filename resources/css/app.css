@@ -300,6 +300,27 @@ a {
     opacity: 1;
 }
 
+.hero-box {
+    animation: hero-float 7s ease-in-out infinite;
+}
+
+@keyframes hero-float {
+    0%,
+    100% {
+        transform: translateY(-50%);
+    }
+    50% {
+        transform: translateY(calc(-50% - 14px));
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hero-box {
+        animation: none;
+        transform: translateY(-50%);
+    }
+}
+
 .reveal {
     opacity: 0;
     transform: translateY(14px);

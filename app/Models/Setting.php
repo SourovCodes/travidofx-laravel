@@ -4,11 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class Setting extends Model
 {
     public const HOMEPAGE_RESULT_LINKS = 'homepage_result_links';
+
+    public const HOMEPAGE_CONTENT = 'homepage_content';
+
+    public const HOMEPAGE_UPLOAD_DISK = 'public';
 
     public const PRICING_PACKAGES = 'pricing_packages';
 
@@ -204,6 +209,174 @@ class Setting extends Model
     }
 
     /**
+     * Raw homepage content: config defaults with any saved sections layered on top.
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    public static function homepageContentState(): array
+    {
+        $defaults = config('homepage', []);
+        $stored = self::getArray(self::HOMEPAGE_CONTENT);
+        $state = [];
+
+        foreach ($defaults as $section => $values) {
+            $state[$section] = array_replace(
+                $values,
+                is_array($stored[$section] ?? null) ? $stored[$section] : [],
+            );
+        }
+
+        return $state;
+    }
+
+    /**
+     * Homepage content resolved for the public page (image URLs, rendered markdown).
+     *
+     * @return array<string, mixed>
+     */
+    public static function homepageContent(): array
+    {
+        $content = self::homepageContentState();
+        $defaults = config('homepage', []);
+        $text = fn (string $section, string $key): string => trim((string) ($content[$section][$key] ?? ''));
+        $image = fn (string $section, string $key): ?string => self::homepageImageUrl(
+            $content[$section][$key] ?? null,
+            $defaults[$section][$key] ?? null,
+        );
+        $list = fn (string $section, string $key): array => array_values(array_filter(
+            is_array($content[$section][$key] ?? null) ? $content[$section][$key] : [],
+            'is_array',
+        ));
+
+        return [
+            'hero' => [
+                'backgroundImage' => $image('hero', 'background_image'),
+                'boxImage' => (bool) ($content['hero']['show_box'] ?? false) ? $image('hero', 'box_image') : null,
+                'slides' => array_map(fn (array $slide): array => [
+                    'subtitle' => trim((string) ($slide['subtitle'] ?? '')),
+                    'title' => trim((string) ($slide['title'] ?? '')),
+                    'body' => self::inlineMarkdown($slide['body'] ?? ''),
+                ], $list('hero', 'slides')),
+            ],
+            'successKeys' => [
+                'heading' => $text('success_keys', 'heading'),
+                'items' => array_map(fn (array $item): array => [
+                    'image' => self::homepageImageUrl($item['image'] ?? null, $item['default_image'] ?? null),
+                    'title' => trim((string) ($item['title'] ?? '')),
+                    'subtitle' => trim((string) ($item['subtitle'] ?? '')),
+                ], $list('success_keys', 'items')),
+            ],
+            'description' => [
+                'eyebrow' => $text('description', 'eyebrow'),
+                'body' => Str::markdown($text('description', 'body'), [
+                    'html_input' => 'strip',
+                    'allow_unsafe_links' => false,
+                ]),
+                'featuresHeading' => $text('description', 'features_heading'),
+                'features' => self::normalizeFeatures($content['description']['features'] ?? [], 30),
+                'disclaimer' => $text('description', 'disclaimer'),
+                'packageImage' => $image('description', 'package_image'),
+                'iconImage' => $image('description', 'icon_image'),
+            ],
+            'results' => [
+                'source' => $text('results', 'source'),
+                'heading' => $text('results', 'heading'),
+                'title' => $text('results', 'title'),
+                'body' => $text('results', 'body'),
+                'image' => $image('results', 'image'),
+                'buttonLabel' => $text('results', 'button_label'),
+                'buttonUrl' => self::normalizeUrl(
+                    $content['results']['button_url'] ?? self::homepageResultLinks()['balanced'],
+                ),
+            ],
+            'whyChoose' => [
+                'emoji' => $text('why_choose', 'emoji'),
+                'heading' => $text('why_choose', 'heading'),
+                'items' => array_map(fn (array $item): array => [
+                    'icon' => (string) ($item['icon'] ?? 'check'),
+                    'title' => trim((string) ($item['title'] ?? '')),
+                    'subtitle' => trim((string) ($item['subtitle'] ?? '')),
+                ], $list('why_choose', 'items')),
+            ],
+            'pricingBanner' => [
+                'intro' => self::inlineMarkdown($content['pricing_banner']['intro'] ?? ''),
+                'heading' => $text('pricing_banner', 'heading'),
+                'highlight' => $text('pricing_banner', 'highlight'),
+            ],
+            'installation' => [
+                'heading' => $text('installation', 'heading'),
+                'videoUrl' => $text('installation', 'video_url'),
+                'stats' => array_map(fn (array $stat): array => [
+                    'value' => trim((string) ($stat['value'] ?? '')),
+                    'label' => trim((string) ($stat['label'] ?? '')),
+                ], $list('installation', 'stats')),
+            ],
+            'gallery' => [
+                'heading' => $text('gallery', 'heading'),
+                'subtitle' => $text('gallery', 'subtitle'),
+            ],
+            'faq' => [
+                'heading' => $text('faq', 'heading'),
+                'items' => array_map(fn (array $item): array => [
+                    'question' => trim((string) ($item['question'] ?? '')),
+                    'answer' => trim((string) ($item['answer'] ?? '')),
+                ], $list('faq', 'items')),
+            ],
+            'testimonials' => [
+                'heading' => $text('testimonials', 'heading'),
+                'subtitle' => $text('testimonials', 'subtitle'),
+            ],
+            'contact' => [
+                'heading' => $text('contact', 'heading'),
+                'subtitle' => $text('contact', 'subtitle'),
+                'ctaHeading' => $text('contact', 'cta_heading'),
+                'ctaBody' => $text('contact', 'cta_body'),
+            ],
+        ];
+    }
+
+    /**
+     * Resolve an uploaded file path (or bundled /img path) to a public URL.
+     */
+    public static function homepageImageUrl(mixed $path, mixed $default = null): ?string
+    {
+        $path = is_string($path) ? trim($path) : '';
+
+        if ($path === '') {
+            return is_string($default) && $default !== '' ? self::homepageImageUrl($default) : null;
+        }
+
+        if (self::isBundledAsset($path)) {
+            return $path;
+        }
+
+        return Storage::disk(self::HOMEPAGE_UPLOAD_DISK)->url($path);
+    }
+
+    /**
+     * Whether a stored image value points at a bundled asset rather than an upload.
+     */
+    public static function isBundledAsset(mixed $path): bool
+    {
+        return is_string($path) && Str::startsWith($path, ['/', 'http://', 'https://']);
+    }
+
+    /**
+     * Render a short text with **bold** support, turning line breaks into <br>.
+     */
+    private static function inlineMarkdown(mixed $value): string
+    {
+        $lines = preg_split('/\r\n|\r|\n/', trim((string) $value)) ?: [];
+
+        return collect($lines)
+            ->map(fn (string $line): string => trim(Str::inlineMarkdown($line, [
+                'html_input' => 'strip',
+                'allow_unsafe_links' => false,
+            ])))
+            ->implode('<br>');
+    }
+
+    /**
      * @return array{balanced: string, aggressive: string}
      */
     public static function homepageResultLinks(): array
@@ -375,7 +548,7 @@ class Setting extends Model
     /**
      * @return array<int, string>
      */
-    private static function normalizeFeatures(mixed $features): array
+    private static function normalizeFeatures(mixed $features, int $limit = 12): array
     {
         if (is_string($features)) {
             $features = preg_split('/\r\n|\r|\n/', $features) ?: [];
@@ -388,7 +561,7 @@ class Setting extends Model
         return collect($features)
             ->map(fn (mixed $feature): string => trim((string) $feature))
             ->filter()
-            ->take(12)
+            ->take($limit)
             ->values()
             ->all();
     }

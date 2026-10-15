@@ -9,26 +9,34 @@ import type { PricingPackage } from '@/components/Pricing';
 import {
     ContactCta,
     Description,
-    FxBlueHeader,
-    FxBlueWidget,
     Installation,
     PricingBanner,
+    ProductGallery,
     Results,
-    ResultsHeader,
     SuccessKeys,
     Testimonials,
     WhyChoose,
 } from '@/components/Sections';
-import type { ResultLinks, Review } from '@/components/Sections';
+import type {
+    GalleryGroups,
+    HomepageContent,
+    Review,
+} from '@/components/Sections';
 import { FanBand, TiltBand } from '@/components/Shape';
 
 type Props = {
-    resultLinks: ResultLinks;
+    content: HomepageContent;
     pricingPackages: PricingPackage[];
     reviews: Review[];
+    gallery: GalleryGroups;
 };
 
-export default function Home({ resultLinks, pricingPackages, reviews }: Props) {
+export default function Home({
+    content,
+    pricingPackages,
+    reviews,
+    gallery,
+}: Props) {
     return (
         <>
             <Head title="Tradivo Magic EA V12 — Advanced Gold Expert Advisor for MT5">
@@ -39,27 +47,25 @@ export default function Home({ resultLinks, pricingPackages, reviews }: Props) {
             </Head>
             <Header />
             <main className="flex-1 bg-black">
-                <Hero />
-                <SuccessKeys />
+                <Hero content={content.hero} />
+                <SuccessKeys content={content.successKeys} />
                 <TiltBand />
-                <Description />
-                <ResultsHeader source="Myfxbook V3.9" />
-                <Results links={resultLinks} />
-                <WhyChoose />
+                <Description content={content.description} />
+                <Results content={content.results} />
+                <WhyChoose content={content.whyChoose} />
                 <FanBand />
-                <PricingBanner />
+                <PricingBanner content={content.pricingBanner} />
                 <Pricing packages={pricingPackages} />
                 <FanBand />
-                <Installation />
-                <FxBlueHeader />
-                <FxBlueWidget />
+                <Installation content={content.installation} />
+                <ProductGallery content={content.gallery} groups={gallery} />
                 <FanBand />
-                <PricingBanner />
-                <Pricing packages={pricingPackages} />
-                <FanBand />
-                <Faq />
-                <Testimonials reviews={reviews} />
-                <ContactCta />
+                <Faq content={content.faq} />
+                <Testimonials
+                    content={content.testimonials}
+                    reviews={reviews}
+                />
+                <ContactCta content={content.contact} />
                 <TiltBand />
             </main>
             <Footer />

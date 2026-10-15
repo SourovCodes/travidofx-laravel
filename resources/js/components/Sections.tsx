@@ -1,4 +1,5 @@
 import { Link } from '@inertiajs/react';
+import { useState } from 'react';
 import ContactForm from '@/components/ContactForm';
 import Reveal from '@/components/Reveal';
 
@@ -10,38 +11,118 @@ export type Review = {
     body: string;
 };
 
+/* -------------------- Content types -------------------- */
+
+export type HeroContent = {
+    backgroundImage: string | null;
+    boxImage: string | null;
+    slides: { subtitle: string; title: string; body: string }[];
+};
+
+export type SuccessKeysContent = {
+    heading: string;
+    items: { image: string | null; title: string; subtitle: string }[];
+};
+
+export type DescriptionContent = {
+    eyebrow: string;
+    body: string;
+    featuresHeading: string;
+    features: string[];
+    disclaimer: string;
+    packageImage: string | null;
+    iconImage: string | null;
+};
+
+export type ResultsContent = {
+    source: string;
+    heading: string;
+    title: string;
+    body: string;
+    image: string | null;
+    buttonLabel: string;
+    buttonUrl: string;
+};
+
+export type WhyChooseContent = {
+    emoji: string;
+    heading: string;
+    items: { icon: string; title: string; subtitle: string }[];
+};
+
+export type PricingBannerContent = {
+    intro: string;
+    heading: string;
+    highlight: string;
+};
+
+export type InstallationContent = {
+    heading: string;
+    videoUrl: string;
+    stats: { value: string; label: string }[];
+};
+
+export type GalleryContent = {
+    heading: string;
+    subtitle: string;
+};
+
+export type FaqContent = {
+    heading: string;
+    items: { question: string; answer: string }[];
+};
+
+export type TestimonialsContent = {
+    heading: string;
+    subtitle: string;
+};
+
+export type ContactContent = {
+    heading: string;
+    subtitle: string;
+    ctaHeading: string;
+    ctaBody: string;
+};
+
+export type HomepageContent = {
+    hero: HeroContent;
+    successKeys: SuccessKeysContent;
+    description: DescriptionContent;
+    results: ResultsContent;
+    whyChoose: WhyChooseContent;
+    pricingBanner: PricingBannerContent;
+    installation: InstallationContent;
+    gallery: GalleryContent;
+    faq: FaqContent;
+    testimonials: TestimonialsContent;
+    contact: ContactContent;
+};
+
+export type GalleryItem = {
+    id: number;
+    title: string;
+    description: string | null;
+    image: string | null;
+    downloadUrl: string | null;
+};
+
+export type GalleryGroups = Record<GalleryStatus, GalleryItem[]>;
+
+type GalleryStatus = 'current' | 'upcoming' | 'past';
+
 /* -------------------- Success Keys -------------------- */
 
-const KEYS_IMGS = [
-    {
-        src: '/img/rslide-1.png',
-        title: 'High Profit',
-        subtitle: 'Up to 50% Profit Monthly.',
-    },
-    {
-        src: '/img/rslide-2.png',
-        title: 'Low Risk',
-        subtitle: '<10% (6% Current DD)',
-    },
-    {
-        src: '/img/rslide-3.png',
-        title: 'Stability',
-        subtitle: 'The 5th Month LIVE',
-    },
-    {
-        src: '/img/rslide-4.png',
-        title: 'Money Management',
-        subtitle: 'Daily Target and DD Controller',
-    },
-];
+export function SuccessKeys({ content }: { content: SuccessKeysContent }) {
+    if (!content.items.length) {
+        return null;
+    }
 
-export function SuccessKeys() {
     return (
         <section className="relative overflow-hidden bg-black py-16 md:py-20">
             <div className="container-x">
                 <Reveal>
                     <h3 className="text-center font-display text-[1.7rem] font-medium text-white md:text-[2rem]">
-                        Success Keys
+                        {content.heading}
                     </h3>
                 </Reveal>
             </div>
@@ -53,23 +134,25 @@ export function SuccessKeys() {
                             className="flex px-2"
                             style={{ scrollSnapType: 'x mandatory', gap: 24 }}
                         >
-                            {KEYS_IMGS.map((item, i) => (
+                            {content.items.map((item, i) => (
                                 <div
-                                    key={item.src}
+                                    key={i}
                                     className="min-w-[180px] shrink-0 basis-[calc((100%-3*24px)/4)]"
                                     style={{ scrollSnapAlign: 'start' }}
                                 >
                                     <div className="aspect-[300/199] overflow-hidden rounded border border-white/[0.06] bg-card">
-                                        <img
-                                            src={item.src}
-                                            alt={
-                                                item.title ??
-                                                `Success key ${i + 1}`
-                                            }
-                                            width={300}
-                                            height={199}
-                                            className="h-full w-full object-cover"
-                                        />
+                                        {item.image ? (
+                                            <img
+                                                src={item.image}
+                                                alt={
+                                                    item.title ||
+                                                    `Success key ${i + 1}`
+                                                }
+                                                width={300}
+                                                height={199}
+                                                className="h-full w-full object-cover"
+                                            />
+                                        ) : null}
                                     </div>
                                     {item.title ? (
                                         <div className="mt-4 text-center">
@@ -93,7 +176,7 @@ export function SuccessKeys() {
 
 /* -------------------- Description -------------------- */
 
-export function Description() {
+export function Description({ content }: { content: DescriptionContent }) {
     return (
         <section
             id="description"
@@ -101,95 +184,44 @@ export function Description() {
         >
             <div className="container-x grid items-center gap-12 lg:grid-cols-2">
                 <Reveal>
-                    <h6 className="font-display text-[clamp(1rem,0.7vw+.6rem,1.15rem)] leading-tight font-bold tracking-[0.18em] text-shape uppercase">
-                        Tradivo Magic EA V12
-                        <br />
-                        Advanced Gold Expert Advisor MT5
+                    <h6 className="font-display text-[clamp(1rem,0.7vw+.6rem,1.15rem)] leading-tight font-bold tracking-[0.18em] whitespace-pre-line text-shape uppercase">
+                        {content.eyebrow}
                     </h6>
 
                     <div className="mt-7 space-y-5 text-[15px] leading-[1.75] text-white/85">
-                        <p>
-                            A powerful Expert Advisor built for XAUUSD traders
-                            who want intelligent automation, controlled recovery
-                            logic, and stable basket management.
-                        </p>
-                        <p>
-                            Tradivo Magic EA V12 combines HTF trend filtering,
-                            counter-trend grid execution, recovery protection,
-                            and smart basket profit targeting into one complete
-                            automated trading system.
-                        </p>
-                        <p className="pt-1 font-bold text-white">
-                            Included Trading Modes:
-                        </p>
-                        <ul className="space-y-1.5">
-                            <li>
-                                -{' '}
-                                <strong className="text-white">
-                                    Balanced Mode
-                                </strong>{' '}
-                                — stable growth with controlled recovery and
-                                moderate drawdown.
-                            </li>
-                            <li>
-                                -{' '}
-                                <strong className="text-white">
-                                    Aggressive Mode
-                                </strong>{' '}
-                                — faster basket cycles with higher profit
-                                potential and increased risk.
-                            </li>
-                            <li>
-                                -{' '}
-                                <strong className="text-white">
-                                    Cent Account Mode
-                                </strong>{' '}
-                                — optimized settings for small balances and USC
-                                accounts.
-                            </li>
-                        </ul>
+                        <div
+                            className="space-y-5 [&_li]:before:content-['-_'] [&_strong]:text-white [&_ul]:space-y-1.5"
+                            dangerouslySetInnerHTML={{ __html: content.body }}
+                        />
 
-                        <div className="pt-3">
-                            <p className="font-bold text-white">
-                                What&apos;s included with Tradivo Magic EA V12:
+                        {content.features.length ? (
+                            <div className="pt-3">
+                                {content.featuresHeading ? (
+                                    <p className="font-bold text-white">
+                                        {content.featuresHeading}
+                                    </p>
+                                ) : null}
+                                <ul className="mt-3 space-y-2">
+                                    {content.features.map((f) => (
+                                        <li
+                                            key={f}
+                                            className="flex items-start gap-2.5"
+                                        >
+                                            <span className="mt-0.5 text-[#3ad072]">
+                                                ✅
+                                            </span>
+                                            <span>{f}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        ) : null}
+
+                        {content.disclaimer ? (
+                            <p className="max-w-xl pt-3 text-[13px] leading-relaxed text-white/70">
+                                {content.disclaimer}
                             </p>
-                            <ul className="mt-3 space-y-2">
-                                {[
-                                    'Full MT5 Expert Advisor package',
-                                    'Gold (XAUUSD) support',
-                                    'Smart counter-trend grid system',
-                                    'HTF EMA trend filtering built in',
-                                    'Advanced recovery & basket management',
-                                    'Automatic news filter protection',
-                                    'Sideways market trading mode',
-                                    'Dynamic lot progression system',
-                                    'Drawdown protection & risk control',
-                                    'Compatible with Standard & USC/Cent accounts',
-                                    'Works with Exness, Vantage or any low-spread broker',
-                                    'One-time payment with future updates',
-                                    'License activation system included',
-                                    'Installation guide & setup support',
-                                    'VPS-friendly 24/7 automation',
-                                ].map((f) => (
-                                    <li
-                                        key={f}
-                                        className="flex items-start gap-2.5"
-                                    >
-                                        <span className="mt-0.5 text-[#3ad072]">
-                                            ✅
-                                        </span>
-                                        <span>{f}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-
-                        <p className="max-w-xl pt-3 text-[13px] leading-relaxed text-white/70">
-                            ⚠️ Trading involves risk. Past performance does not
-                            guarantee future results. Market conditions, broker
-                            execution, spread, volatility, and risk settings can
-                            affect overall performance.
-                        </p>
+                        ) : null}
                     </div>
                 </Reveal>
 
@@ -199,20 +231,24 @@ export function Description() {
                             aria-hidden
                             className="pointer-events-none absolute -inset-8 bg-[radial-gradient(closest-side,rgba(174,131,72,0.18),transparent_70%)] blur-2xl"
                         />
-                        <img
-                            src="/img/tradivo-package.jpeg"
-                            alt="Tradivo Magic EA V12 product box"
-                            width={800}
-                            height={1100}
-                            className="relative h-auto w-full max-w-[420px] rounded-md shadow-[0_30px_60px_-30px_rgba(0,0,0,0.7)]"
-                        />
-                        <img
-                            src="/img/tradivo-icon.jpeg"
-                            alt="Tradivo mark"
-                            width={475}
-                            height={358}
-                            className="absolute right-0 -bottom-6 h-auto w-[38%] max-w-[220px] rounded-md drop-shadow-[0_22px_28px_rgba(0,0,0,0.55)] sm:-right-4 md:-right-6"
-                        />
+                        {content.packageImage ? (
+                            <img
+                                src={content.packageImage}
+                                alt="Tradivo Magic EA V12 product box"
+                                width={800}
+                                height={1100}
+                                className="relative h-auto w-full max-w-[420px] rounded-md shadow-[0_30px_60px_-30px_rgba(0,0,0,0.7)]"
+                            />
+                        ) : null}
+                        {content.iconImage ? (
+                            <img
+                                src={content.iconImage}
+                                alt="Tradivo mark"
+                                width={475}
+                                height={358}
+                                className="absolute right-0 -bottom-6 h-auto w-[38%] max-w-[220px] rounded-md drop-shadow-[0_22px_28px_rgba(0,0,0,0.55)] sm:-right-4 md:-right-6"
+                            />
+                        ) : null}
                     </div>
                 </Reveal>
             </div>
@@ -220,165 +256,90 @@ export function Description() {
     );
 }
 
-/* -------------------- Results header + cards -------------------- */
+/* -------------------- Results -------------------- */
 
-export type ResultLinks = {
-    balanced: string;
-    aggressive: string;
-};
-
-const DEFAULT_RESULT_LINKS: ResultLinks = {
-    balanced: 'https://www.myfxbook.com/members/Tradivorobot/tradivorobot/12044419',
-    aggressive:
-        'https://www.myfxbook.com/members/Tradivorobot/tradivo-magic-ea/12044405',
-};
-
-export function ResultsHeader({
-    source = 'Myfxbook V3.9',
-}: {
-    source?: string;
-}) {
+export function Results({ content }: { content: ResultsContent }) {
     return (
         <section
             id="results"
-            className="relative bg-black pt-16 pb-10 md:pt-20"
+            className="relative bg-black pt-16 pb-16 md:pt-20 md:pb-24"
         >
             <div className="container-x text-center">
                 <Reveal>
-                    <p className="text-[15px] tracking-wide text-white/85">
-                        Verified Performance Statistics By {source}
-                    </p>
-                    <h2 className="section-title mt-4">
-                        Unlock the Full Power of Automated Trading with Tradivo
-                    </h2>
+                    {content.source ? (
+                        <p className="text-[15px] tracking-wide text-white/85">
+                            {content.source}
+                        </p>
+                    ) : null}
+                    <h2 className="section-title mt-4">{content.heading}</h2>
+                </Reveal>
+            </div>
+
+            <div className="container-x mx-auto mt-10 max-w-4xl">
+                <Reveal>
+                    <div className="text-center">
+                        {content.title ? (
+                            <h6 className="font-display text-[1.15rem] font-bold tracking-wider text-white uppercase">
+                                {content.title}
+                            </h6>
+                        ) : null}
+                        {content.body ? (
+                            <p className="mx-auto mt-3 max-w-2xl leading-[1.7] whitespace-pre-line text-white/80">
+                                {content.body}
+                            </p>
+                        ) : null}
+                        {content.image ? (
+                            <div className="mt-6 overflow-hidden rounded border border-white/10 shadow-[0_24px_60px_-30px_rgba(0,0,0,0.7)]">
+                                <img
+                                    src={content.image}
+                                    alt={`${content.title || content.heading} chart`}
+                                    width={940}
+                                    height={644}
+                                    className="h-auto w-full"
+                                />
+                            </div>
+                        ) : null}
+                        {content.buttonLabel ? (
+                            <div className="mt-6">
+                                <a
+                                    href={content.buttonUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="btn-outline-white"
+                                >
+                                    {content.buttonLabel}
+                                </a>
+                            </div>
+                        ) : null}
+                    </div>
                 </Reveal>
             </div>
         </section>
-    );
-}
-
-export function Results({
-    links = DEFAULT_RESULT_LINKS,
-}: {
-    links?: ResultLinks;
-}) {
-    return (
-        <section className="relative bg-black pb-16 md:pb-24">
-            <div className="container-x grid gap-10 lg:grid-cols-2">
-                <ResultCard
-                    title="Tradivo Magic EA V12 — Balanced Mode"
-                    body="Designed for consistent monthly growth potential with strict risk control and intelligent trade management."
-                    img="/img/v12-balance.png"
-                    href={links.balanced}
-                />
-                <ResultCard
-                    title="Tradivo Magic EA V12 — Aggressive Mode"
-                    body="Designed for high-profit performance — stronger lot scaling, up to 50% monthly returns with faster basket cycles."
-                    img="/img/v10-agreesive.png"
-                    href={links.aggressive}
-                />
-            </div>
-        </section>
-    );
-}
-
-function ResultCard({
-    title,
-    body,
-    img,
-    href,
-}: {
-    title: string;
-    body: string;
-    img: string;
-    href: string;
-}) {
-    return (
-        <Reveal>
-            <div className="text-center">
-                <h6 className="font-display text-[1.15rem] font-bold tracking-wider text-white uppercase">
-                    {title}
-                </h6>
-                <p className="mx-auto mt-3 max-w-md leading-[1.7] text-white/80">
-                    {body}
-                </p>
-                <div className="mt-6 overflow-hidden rounded border border-white/10 shadow-[0_24px_60px_-30px_rgba(0,0,0,0.7)]">
-                    <img
-                        src={img}
-                        alt={`${title} chart`}
-                        width={940}
-                        height={644}
-                        className="h-auto w-full"
-                    />
-                </div>
-                <div className="mt-6">
-                    <a
-                        href={href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="btn-outline-white"
-                    >
-                        Check Results --&gt;
-                    </a>
-                </div>
-            </div>
-        </Reveal>
     );
 }
 
 /* -------------------- Why Traders Choose -------------------- */
 
-const WHY = [
-    {
-        icon: 'check',
-        title: 'Verified Logic',
-        sub: 'Tested strategy with consistent execution',
-    },
-    {
-        icon: 'preset',
-        title: 'Smart Grid System',
-        sub: 'Counter-trend entries for better pricing',
-    },
-    {
-        icon: 'moon',
-        title: 'Recovery Engine',
-        sub: 'Smart basket recovery after drawdown',
-    },
-    {
-        icon: 'shield',
-        title: 'Drawdown Protection',
-        sub: 'Hard DD limit for account safety',
-    },
-    {
-        icon: 'infinity',
-        title: 'News Filter',
-        sub: 'Avoids high-impact volatility',
-    },
-    {
-        icon: 'monitor',
-        title: 'MT5 Platform',
-        sub: 'Works on MT5 with dual asset support',
-    },
-];
-
-export function WhyChoose() {
+export function WhyChoose({ content }: { content: WhyChooseContent }) {
     return (
         <section className="relative bg-black py-20 md:py-24">
             <div className="container-x">
                 <Reveal>
                     <div className="text-center">
-                        <div className="text-3xl" aria-hidden>
-                            🧠
-                        </div>
+                        {content.emoji ? (
+                            <div className="text-3xl" aria-hidden>
+                                {content.emoji}
+                            </div>
+                        ) : null}
                         <h1 className="mt-3 font-display text-[clamp(1.6rem,2.2vw+.7rem,2.4rem)] font-medium text-white">
-                            Why Traders Choose Tradivo Magic EA V12
+                            {content.heading}
                         </h1>
                     </div>
                 </Reveal>
 
                 <div className="mt-12 grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
-                    {WHY.map((w, i) => (
-                        <Reveal key={w.title} delay={(i % 3) * 90}>
+                    {content.items.map((w, i) => (
+                        <Reveal key={i} delay={(i % 3) * 90}>
                             <div className="text-center">
                                 <div className="mx-auto inline-flex h-12 w-12 items-center justify-center text-white">
                                     <WhyIcon name={w.icon} />
@@ -387,7 +348,7 @@ export function WhyChoose() {
                                     {w.title}
                                 </h3>
                                 <p className="mt-2 text-[14px] leading-relaxed text-white/70">
-                                    {w.sub}
+                                    {w.subtitle}
                                 </p>
                             </div>
                         </Reveal>
@@ -451,23 +412,23 @@ function WhyIcon({ name }: { name: string }) {
 
 /* -------------------- Pricing intro banner -------------------- */
 
-export function PricingBanner() {
+export function PricingBanner({ content }: { content: PricingBannerContent }) {
     return (
         <section className="relative bg-black pt-14 pb-10 text-center">
             <div className="container-x">
                 <Reveal>
-                    <p className="mx-auto max-w-3xl text-[15px] text-white/85">
-                        Receive your <strong>download links</strong>,{' '}
-                        <strong>activation email</strong>, and{' '}
-                        <strong>step-by-step setup video</strong> immediately
-                        after purchase.
-                    </p>
-                    <h2 className="section-title mt-4">
-                        Get Instant Access to Tradivo Magic EA V12
-                    </h2>
-                    <p className="mt-3 font-display font-semibold text-white/95">
-                        🔥 Launch Discount Active – Ends Soon
-                    </p>
+                    {content.intro ? (
+                        <p
+                            className="mx-auto max-w-3xl text-[15px] text-white/85"
+                            dangerouslySetInnerHTML={{ __html: content.intro }}
+                        />
+                    ) : null}
+                    <h2 className="section-title mt-4">{content.heading}</h2>
+                    {content.highlight ? (
+                        <p className="mt-3 font-display font-semibold text-white/95">
+                            {content.highlight}
+                        </p>
+                    ) : null}
                 </Reveal>
             </div>
         </section>
@@ -476,96 +437,54 @@ export function PricingBanner() {
 
 /* -------------------- Installation -------------------- */
 
-const STEPS = [
-    {
-        title: '1. Choose Your Plan',
-        body: 'Select Basic, Advanced, Pro or Business. After checkout, you receive the EA instantly via email.',
-    },
-    {
-        title: '2. Download the EA Package',
-        body: 'Get Tradivo Magic EA V12.0 (MT5), setup video, license activation guide and the Set file.',
-    },
-    {
-        title: '3. Install & Activate the EA',
-        body: 'MT5 → File → Open Data Folder → MQL5/Experts. Refresh, drag onto XAUUSD and enter your license key.',
-    },
-    {
-        title: '4. Select Your Trading Mode',
-        body: 'Choose the Symbol and mode, then load the .set file. EA Settings → Load → select the .set file → OK.',
-    },
-    {
-        title: '5. Start Automated Trading',
-        body: "Enable Algo Trading and allow DLL imports. The blue icon confirms it's running.",
-    },
-    {
-        title: '6. Monitor & Get Support',
-        body: 'Receive lifetime updates, support via email/Telegram and access to new set files, tutorials and risk management help.',
-    },
-];
-
-export function Installation() {
+export function Installation({ content }: { content: InstallationContent }) {
     return (
         <section className="relative bg-black py-20 md:py-24">
             <div className="container-x">
                 <Reveal>
                     <div className="text-center">
-                        <h2 className="section-title">
-                            Tradivo Magic EA Installation Guide
-                        </h2>
+                        <h2 className="section-title">{content.heading}</h2>
                     </div>
                 </Reveal>
 
-                <Reveal delay={120}>
-                    <div className="mx-auto mt-10 aspect-video max-w-3xl overflow-hidden rounded-md border border-white/10 bg-black/60">
-                        <iframe
-                            src="https://www.youtube.com/embed/vg8RFEG9mTk"
-                            title="Tradivo Magic EA installation guide"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowFullScreen
-                            className="h-full w-full"
-                        />
+                {content.videoUrl ? (
+                    <Reveal delay={120}>
+                        <div className="mx-auto mt-10 aspect-video max-w-3xl overflow-hidden rounded-md border border-white/10 bg-black/60">
+                            <iframe
+                                src={content.videoUrl}
+                                title={content.heading}
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowFullScreen
+                                className="h-full w-full"
+                            />
+                        </div>
+                    </Reveal>
+                ) : null}
+
+                {content.stats.length ? (
+                    <div
+                        className={`mt-14 grid gap-6 ${statsGridClass(content.stats.length)}`}
+                    >
+                        {content.stats.map((stat, i) => (
+                            <StatCol
+                                key={i}
+                                value={stat.value}
+                                label={stat.label}
+                            />
+                        ))}
                     </div>
-                </Reveal>
-
-                <div className="mt-14 grid gap-6 sm:grid-cols-3">
-                    <StatCol value="50%" label="Up to 50% Monthly Returns" />
-                    <StatCol value="24/7" label="VPS-Friendly Automation" />
-                    <StatCol value="V12" label="Tradivo Magic EA V12" />
-                </div>
-
-                <Reveal delay={120}>
-                    <div className="mt-16 text-center">
-                        <h2 className="section-title">
-                            Steps of Purchase to Profit
-                        </h2>
-                        <h3 className="mt-2 font-display text-[1.4rem] font-medium text-white md:text-[1.7rem]">
-                            How to Start with Tradivo Magic EA V12
-                        </h3>
-                        <p className="section-subtitle mx-auto mt-4">
-                            Follow these simple steps to install, activate, and
-                            start trading automatically with Tradivo Magic EA
-                            V12.0 on MT5.
-                        </p>
-                    </div>
-                </Reveal>
-
-                <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-                    {STEPS.map((s, i) => (
-                        <Reveal key={s.title} delay={(i % 3) * 90}>
-                            <div className="h-full rounded-md border border-white/10 bg-black/30 p-6">
-                                <h4 className="font-display text-[1.05rem] font-semibold text-white">
-                                    {s.title}
-                                </h4>
-                                <p className="mt-3 text-[14px] leading-relaxed text-white/75">
-                                    {s.body}
-                                </p>
-                            </div>
-                        </Reveal>
-                    ))}
-                </div>
+                ) : null}
             </div>
         </section>
     );
+}
+
+function statsGridClass(count: number): string {
+    if (count >= 4) {
+        return 'sm:grid-cols-2 lg:grid-cols-4';
+    }
+
+    return count === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2';
 }
 
 function StatCol({ value, label }: { value: string; label: string }) {
@@ -581,86 +500,153 @@ function StatCol({ value, label }: { value: string; label: string }) {
     );
 }
 
-/* -------------------- FxBlue header -------------------- */
+/* -------------------- Product gallery -------------------- */
 
-export function FxBlueHeader() {
+const GALLERY_TABS: { key: GalleryStatus; label: string }[] = [
+    { key: 'current', label: 'Current' },
+    { key: 'upcoming', label: 'Upcoming' },
+    { key: 'past', label: 'Past' },
+];
+
+export function ProductGallery({
+    content,
+    groups,
+}: {
+    content: GalleryContent;
+    groups: GalleryGroups;
+}) {
+    const tabs = GALLERY_TABS.filter((tab) => groups[tab.key]?.length);
+    const [active, setActive] = useState<GalleryStatus | null>(null);
+
+    if (!tabs.length) {
+        return null;
+    }
+
+    const activeKey =
+        active && tabs.some((tab) => tab.key === active) ? active : tabs[0].key;
+
     return (
-        <section className="relative bg-black pt-14 pb-10">
-            <div className="container-x text-center">
+        <section id="gallery" className="relative bg-black py-20 md:py-24">
+            <div className="container-x">
                 <Reveal>
-                    <h2 className="section-title">
-                        Experience Real-Time, Verified Trading Success!
-                    </h2>
+                    <div className="mx-auto max-w-2xl text-center">
+                        <h2 className="section-title">{content.heading}</h2>
+                        {content.subtitle ? (
+                            <p className="section-subtitle mx-auto mt-4">
+                                {content.subtitle}
+                            </p>
+                        ) : null}
+                    </div>
                 </Reveal>
+
+                {tabs.length > 1 ? (
+                    <div
+                        role="tablist"
+                        aria-label="Product gallery"
+                        className="mt-10 flex flex-wrap justify-center gap-2"
+                    >
+                        {tabs.map((tab) => {
+                            const isActive = tab.key === activeKey;
+
+                            return (
+                                <button
+                                    key={tab.key}
+                                    type="button"
+                                    role="tab"
+                                    aria-selected={isActive}
+                                    onClick={() => setActive(tab.key)}
+                                    className={`rounded-full border px-5 py-2 font-display text-sm font-semibold tracking-wide transition-colors ${
+                                        isActive
+                                            ? 'border-shape bg-shape text-black'
+                                            : 'border-white/15 text-white/75 hover:border-white/40 hover:text-white'
+                                    }`}
+                                >
+                                    {tab.label}
+                                    <span className="ml-2 opacity-60">
+                                        {groups[tab.key].length}
+                                    </span>
+                                </button>
+                            );
+                        })}
+                    </div>
+                ) : null}
+
+                <div
+                    role="tabpanel"
+                    className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+                >
+                    {groups[activeKey].map((item, i) => (
+                        <Reveal key={item.id} delay={(i % 3) * 90}>
+                            <GalleryCard item={item} />
+                        </Reveal>
+                    ))}
+                </div>
             </div>
         </section>
     );
 }
 
-/* -------------------- FxBlue widget gallery -------------------- */
-
-const RESULT_GALLERY = [
-    '/img/rslide-2.png',
-    '/img/rslide-3.png',
-    '/img/rslide-4.png',
-    '/img/rslide-5.png',
-];
-
-export function FxBlueWidget() {
+function GalleryCard({ item }: { item: GalleryItem }) {
     return (
-        <section className="relative bg-black pt-12 pb-16">
-            <div className="container-x">
-                <Reveal>
-                    <div className="overflow-hidden rounded-md border border-white/10 bg-white/[0.03]">
-                        <img
-                            src="/img/rslide-1.png"
-                            alt="FXBlue live account performance widget"
-                            width={1280}
-                            height={850}
-                            className="h-auto w-full"
-                        />
-                    </div>
-                </Reveal>
-
-                <Reveal delay={120}>
-                    <div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-2">
-                        {RESULT_GALLERY.map((src, i) => (
-                            <div
-                                key={src}
-                                className="overflow-hidden rounded-md border border-white/10 bg-white/[0.03]"
-                            >
-                                <img
-                                    src={src}
-                                    alt={`Verified trading result ${i + 1}`}
-                                    width={1280}
-                                    height={850}
-                                    className="h-auto w-full"
-                                />
-                            </div>
-                        ))}
-                    </div>
-                </Reveal>
+        <div className="flex h-full flex-col overflow-hidden rounded-md border border-white/10 bg-black/30">
+            <div className="aspect-[4/3] overflow-hidden bg-card">
+                {item.image ? (
+                    <img
+                        src={item.image}
+                        alt={item.title}
+                        loading="lazy"
+                        className="h-full w-full object-cover"
+                    />
+                ) : null}
             </div>
-        </section>
+            <div className="flex flex-1 flex-col p-6">
+                <h3 className="font-display text-[1.1rem] font-semibold text-white">
+                    {item.title}
+                </h3>
+                {item.description ? (
+                    <p className="mt-2 flex-1 text-[14px] leading-relaxed text-white/70">
+                        {item.description}
+                    </p>
+                ) : (
+                    <div className="flex-1" />
+                )}
+                {item.downloadUrl ? (
+                    <div className="mt-5">
+                        <a
+                            href={item.downloadUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="btn-outline-white"
+                        >
+                            Download
+                        </a>
+                    </div>
+                ) : null}
+            </div>
+        </div>
     );
 }
 
 /* -------------------- Testimonials -------------------- */
 
-export function Testimonials({ reviews }: { reviews: Review[] }) {
+export function Testimonials({
+    content,
+    reviews,
+}: {
+    content: TestimonialsContent;
+    reviews: Review[];
+}) {
     return (
         <section id="reviews" className="relative bg-black py-20 md:py-24">
             <div className="container-x">
                 <Reveal>
                     <div className="mx-auto max-w-2xl text-center">
-                        <h2 className="section-title">
-                            What Our Clients Say About Us?
-                        </h2>
-                        <p className="section-subtitle mx-auto mt-4">
-                            Testimonials and success stories from traders
-                            running Tradivo Magic EA V12 on live and cent
-                            accounts.
-                        </p>
+                        <h2 className="section-title">{content.heading}</h2>
+                        {content.subtitle ? (
+                            <p className="section-subtitle mx-auto mt-4">
+                                {content.subtitle}
+                            </p>
+                        ) : null}
                         <div className="mt-7 flex justify-center">
                             <Link href="/reviews" className="btn-outline-white">
                                 Write a Review --&gt;
@@ -744,7 +730,7 @@ function TestimonialCard({
 
 /* -------------------- Contact CTA -------------------- */
 
-export function ContactCta() {
+export function ContactCta({ content }: { content: ContactContent }) {
     return (
         <section
             id="contact"
@@ -756,26 +742,25 @@ export function ContactCta() {
             />
             <div className="container-x mx-auto max-w-3xl text-center">
                 <Reveal>
-                    <h2 className="section-title">
-                        We&apos;re Here to Support Your Trading Success
-                    </h2>
-                    <p className="mt-3 text-white/80">
-                        Our Forex Trading Bot&apos;s dedicated support team will
-                        reach you very soon
-                    </p>
+                    <h2 className="section-title">{content.heading}</h2>
+                    {content.subtitle ? (
+                        <p className="mt-3 text-white/80">{content.subtitle}</p>
+                    ) : null}
                 </Reveal>
             </div>
 
             <div className="container-x mt-14 grid items-start gap-10 lg:grid-cols-2">
                 <Reveal>
-                    <h3 className="font-display text-[clamp(1.6rem,2vw+.5rem,2.2rem)] font-medium text-white">
-                        Ready to Automate Your Gold Trading?
-                    </h3>
-                    <p className="mt-4 max-w-xl leading-[1.7] text-white/80">
-                        Discover what Tradivo Magic EA V12 can do for your
-                        trading. Our team is ready to help you set up,
-                        fine-tune, and get the most out of every basket cycle.
-                    </p>
+                    {content.ctaHeading ? (
+                        <h3 className="font-display text-[clamp(1.6rem,2vw+.5rem,2.2rem)] font-medium text-white">
+                            {content.ctaHeading}
+                        </h3>
+                    ) : null}
+                    {content.ctaBody ? (
+                        <p className="mt-4 max-w-xl leading-[1.7] whitespace-pre-line text-white/80">
+                            {content.ctaBody}
+                        </p>
+                    ) : null}
                 </Reveal>
 
                 <Reveal delay={120}>

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ProductGalleryStatus;
+use App\Models\ProductGalleryItem;
 use App\Models\Review;
 use App\Models\Setting;
 use Inertia\Inertia;
@@ -18,7 +20,7 @@ class HomeController extends Controller
             ->get(['id', 'name', 'title', 'rating', 'body']);
 
         return Inertia::render('home', [
-            'resultLinks' => Setting::homepageResultLinks(),
+            'content' => Setting::homepageContent(),
             'pricingPackages' => collect(Setting::pricingPackages())
                 ->map(fn (array $package): array => [
                     'slug' => $package['slug'],
@@ -31,6 +33,38 @@ class HomeController extends Controller
                 ])
                 ->values(),
             'reviews' => $reviews,
+            'gallery' => $this->gallery(),
         ]);
+    }
+
+    /**
+     * Published gallery items grouped by status tab.
+     *
+     * @return array<string, array<int, array{id: int, title: string, description: string|null, image: string|null, downloadUrl: string|null}>>
+     */
+    private function gallery(): array
+    {
+        $items = ProductGalleryItem::published()
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
+
+        $gallery = [];
+
+        foreach (ProductGalleryStatus::cases() as $status) {
+            $gallery[$status->value] = $items
+                ->where('status', $status)
+                ->map(fn (ProductGalleryItem $item): array => [
+                    'id' => $item->id,
+                    'title' => $item->title,
+                    'description' => $item->description,
+                    'image' => $item->imageUrl(),
+                    'downloadUrl' => $item->download_url,
+                ])
+                ->values()
+                ->all();
+        }
+
+        return $gallery;
     }
 }

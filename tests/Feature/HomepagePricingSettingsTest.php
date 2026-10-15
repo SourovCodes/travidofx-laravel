@@ -33,10 +33,7 @@ test('homepage uses editable result links and pricing packages', function () {
         ->assertOk()
         ->inertiaProps();
 
-    expect($props['resultLinks'])->toBe([
-        'balanced' => 'https://example.com/balanced-results',
-        'aggressive' => 'https://example.com/aggressive-results',
-    ])
+    expect($props['content']['results']['buttonUrl'])->toBe('https://example.com/balanced-results')
         ->and($props['pricingPackages'])->toHaveCount(2)
         ->and($props['pricingPackages'][0])->toMatchArray([
             'slug' => 'starter',
