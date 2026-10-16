@@ -64,3 +64,58 @@ export type LandingContent = {
         socialLinks: SocialLink[];
     };
 };
+
+export type ProductsLandingContent = {
+    seo: {
+        title: string;
+        description: string;
+    };
+    hero: {
+        badge: string;
+        title: string;
+        subtitle: string;
+        paragraphs: string[];
+        image: string | null;
+        buttonLabel: string;
+        buttonUrl: string;
+    };
+    whyChoose: {
+        heading: string;
+        items: string[];
+    };
+    consistency: {
+        heading: string;
+        intro: string;
+        items: string[];
+        note: string;
+    };
+    setup: {
+        heading: string;
+        steps: string[];
+    };
+    included: {
+        heading: string;
+        items: string[];
+    };
+    pricing: {
+        heading: string;
+        body: string;
+        showPlans: boolean;
+        buttonLabel: string;
+        buttonUrl: string | null;
+    };
+    faq: {
+        heading: string;
+        items: { question: string; answer: string }[];
+    };
+    risk: {
+        heading: string;
+        body: string;
+    };
+    cta: {
+        heading: string;
+        body: string;
+        buttonLabel: string;
+        buttonUrl: string;
+    };
+};

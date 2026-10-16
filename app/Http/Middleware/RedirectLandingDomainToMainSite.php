@@ -10,13 +10,13 @@ use Symfony\Component\HttpFoundation\Response;
 class RedirectLandingDomainToMainSite
 {
     /**
-     * The landing domain only serves its home page; every other path continues on the main website.
+     * Landing domains only serve their home page; every other path continues on the main website.
      *
      * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if ($request->path() === '/' || ! Setting::isLandingPageHost($request->getHost())) {
+        if ($request->path() === '/' || Setting::landingPageForHost($request->getHost()) === null) {
             return $next($request);
         }
 

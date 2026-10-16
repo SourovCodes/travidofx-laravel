@@ -2,186 +2,67 @@
 
 namespace App\Filament\Pages;
 
+use App\Enums\LandingPage;
 use App\Models\Setting;
-use BackedEnum;
-use Closure;
-use Filament\Actions\Action;
-use Filament\Actions\ActionGroup;
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
-use Filament\Notifications\Notification;
-use Filament\Pages\Page;
 use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
-use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 
-class LandingPageSettings extends Page implements HasForms
+class ContactLandingPageSettings extends LandingPageSettingsPage
 {
-    use InteractsWithForms;
-
-    /**
-     * Repeater fields stored as plain lists, as [section, key] pairs.
-     *
-     * @var array<int, array{0: string, 1: string}>
-     */
-    private const LIST_FIELDS = [
-        ['hero', 'features'],
-        ['contact', 'items'],
-        ['about', 'features'],
-        ['highlights', 'items'],
-        ['footer', 'social_links'],
-    ];
-
     private const HIGHLIGHT_HINT = 'Wrap words in **double asterisks** to show them in green.';
 
-    private const DOMAIN_REGEX = '/^(?=.{1,253}$)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/';
+    protected static ?int $navigationSort = 3;
 
-    protected string $view = 'filament.pages.landing-page-settings';
-
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedGlobeAlt;
-
-    protected static ?string $navigationLabel = 'Landing page';
-
-    protected static ?string $title = 'Landing page settings';
-
-    public ?array $data = [];
-
-    public function mount(): void
+    public static function landingPage(): LandingPage
     {
-        $this->form->fill([
-            'domains' => Setting::landingPageDomains(),
-            'content' => Setting::landingPageContentState(),
-        ]);
+        return LandingPage::Contact;
     }
 
-    public function form(Schema $schema): Schema
+    protected function listFields(): array
     {
-        return $schema
-            ->components([
-                Tabs::make('Landing page')
-                    ->persistTabInQueryString()
-                    ->tabs([
-                        $this->generalTab(),
-                        $this->heroTab(),
-                        $this->contactTab(),
-                        $this->aboutTab(),
-                        $this->highlightsAndFooterTab(),
-                    ]),
-            ])
-            ->statePath('data');
-    }
-
-    protected function getHeaderActions(): array
-    {
-        $domains = Setting::landingPageDomains();
-
-        if ($domains === []) {
-            return [];
-        }
-
         return [
-            ActionGroup::make(array_map(
-                fn (string $domain): Action => Action::make('view-'.md5($domain))
-                    ->label($domain)
-                    ->url("https://{$domain}", shouldOpenInNewTab: true),
-                $domains,
-            ))
-                ->label('View landing page')
-                ->icon(Heroicon::OutlinedArrowTopRightOnSquare)
-                ->color('gray')
-                ->button(),
+            ['hero', 'features'],
+            ['contact', 'items'],
+            ['about', 'features'],
+            ['highlights', 'items'],
+            ['footer', 'social_links'],
         ];
     }
 
-    public function save(): void
+    protected function generalComponents(): array
     {
-        $state = $this->form->getState();
-        $content = $state['content'] ?? [];
-
-        foreach (self::LIST_FIELDS as [$section, $key]) {
-            $content[$section][$key] = array_values($content[$section][$key] ?? []);
-        }
-
-        Setting::set(Setting::LANDING_PAGE_DOMAINS, Setting::normalizeDomains($state['domains'] ?? []));
-        Setting::set(Setting::LANDING_PAGE_CONTENT, $content);
-
-        $this->data['domains'] = Setting::landingPageDomains();
-
-        Notification::make()
-            ->title('Landing page saved')
-            ->success()
-            ->send();
+        return [
+            Section::make('Header')
+                ->columns(2)
+                ->components([
+                    self::imageUpload('content.header.logo', 'Logo')
+                        ->helperText('Square image, shown left of the name. Leave empty to use the shield icon.'),
+                    TextInput::make('content.header.brand')
+                        ->label('Brand name')
+                        ->required()
+                        ->maxLength(80)
+                        ->helperText(self::HIGHLIGHT_HINT),
+                    TextInput::make('content.header.tagline')
+                        ->label('Tagline')
+                        ->maxLength(120)
+                        ->columnSpanFull(),
+                ]),
+        ];
     }
 
-    private function generalTab(): Tab
+    protected function contentTabs(): array
     {
-        return Tab::make('Domain & header')
-            ->components([
-                Section::make('Domains')
-                    ->description('Visitors on these domains see the landing page instead of the main website. Every other path on them redirects to the main website.')
-                    ->components([
-                        TagsInput::make('domains')
-                            ->label('Landing page domains')
-                            ->placeholder('Type a domain and press Enter')
-                            ->reorderable()
-                            ->splitKeys(['Tab', ',', ' '])
-                            ->rules(['array', 'max:20'])
-                            ->nestedRecursiveRules([
-                                'string',
-                                'max:253',
-                                fn (): Closure => function (string $attribute, mixed $value, Closure $fail): void {
-                                    $domain = Setting::normalizeDomain($value);
-
-                                    if (! preg_match(self::DOMAIN_REGEX, $domain)) {
-                                        $fail("\"{$value}\" is not a valid domain. Use a domain like info.example.com.");
-
-                                        return;
-                                    }
-
-                                    if ($domain === Setting::normalizeDomain(parse_url((string) config('app.url'), PHP_URL_HOST))) {
-                                        $fail("{$domain} is the main website domain. Use a different domain or subdomain.");
-                                    }
-                                },
-                            ])
-                            ->helperText('Add each domain in cPanel too, with its document root set to tradivofx/current/public. Remove every domain to turn the landing page off.'),
-                    ]),
-                Section::make('Search & browser tab')
-                    ->columns(2)
-                    ->components([
-                        TextInput::make('content.seo.title')
-                            ->label('Page title')
-                            ->required()
-                            ->maxLength(120),
-                        Textarea::make('content.seo.description')
-                            ->label('Meta description')
-                            ->rows(2)
-                            ->maxLength(300),
-                    ]),
-                Section::make('Header')
-                    ->columns(2)
-                    ->components([
-                        self::imageUpload('content.header.logo', 'Logo')
-                            ->helperText('Square image, shown left of the name. Leave empty to use the shield icon.'),
-                        TextInput::make('content.header.brand')
-                            ->label('Brand name')
-                            ->required()
-                            ->maxLength(80)
-                            ->helperText(self::HIGHLIGHT_HINT),
-                        TextInput::make('content.header.tagline')
-                            ->label('Tagline')
-                            ->maxLength(120)
-                            ->columnSpanFull(),
-                    ]),
-            ]);
+        return [
+            $this->heroTab(),
+            $this->contactTab(),
+            $this->aboutTab(),
+            $this->highlightsAndFooterTab(),
+        ];
     }
 
     private function heroTab(): Tab
@@ -387,16 +268,5 @@ class LandingPageSettings extends Page implements HasForms
             ->options(Setting::LANDING_COLORS)
             ->required()
             ->native(false);
-    }
-
-    private static function imageUpload(string $name, string $label): FileUpload
-    {
-        return FileUpload::make($name)
-            ->label($label)
-            ->image()
-            ->disk(Setting::HOMEPAGE_UPLOAD_DISK)
-            ->visibility('public')
-            ->directory('landing')
-            ->maxSize(5120);
     }
 }

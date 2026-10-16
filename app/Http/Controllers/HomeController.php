@@ -12,10 +12,12 @@ use Inertia\Response;
 
 class HomeController extends Controller
 {
-    public function index(Request $request, LandingPageController $landingPage): Response
+    public function index(Request $request, LandingPageController $landingPages): Response
     {
-        if (Setting::isLandingPageHost($request->getHost())) {
-            return $landingPage();
+        $landingPage = Setting::landingPageForHost($request->getHost());
+
+        if ($landingPage !== null) {
+            return $landingPages->show($landingPage);
         }
 
         $reviews = Review::published()
@@ -26,17 +28,7 @@ class HomeController extends Controller
 
         return Inertia::render('home', [
             'content' => Setting::homepageContent(),
-            'pricingPackages' => collect(Setting::pricingPackages())
-                ->map(fn (array $package): array => [
-                    'slug' => $package['slug'],
-                    'name' => $package['name'],
-                    'accessDuration' => $package['access_duration'],
-                    'amount' => $package['amount'],
-                    'oldAmount' => $package['old_amount'],
-                    'features' => $package['features'],
-                    'badge' => $package['badge'],
-                ])
-                ->values(),
+            'pricingPackages' => Setting::pricingPackageProps(),
             'reviews' => $reviews,
             'gallery' => $this->gallery(),
         ]);

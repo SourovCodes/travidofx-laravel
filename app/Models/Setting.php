@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\LandingPage;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
@@ -61,10 +62,6 @@ class Setting extends Model
         ['platform' => 'tiktok', 'url' => 'https://tiktok.com/@tradivo.robot'],
         ['platform' => 'youtube', 'url' => 'https://www.youtube.com/@Tradivo_Robot'],
     ];
-
-    public const LANDING_PAGE_CONTENT = 'landing_page_content';
-
-    public const LANDING_PAGE_DOMAINS = 'landing_page_domains';
 
     /** @var array<string, string> */
     public const LANDING_ICONS = [
@@ -507,27 +504,36 @@ class Setting extends Model
     }
 
     /**
-     * The domains the landing page is served on. An empty list turns the landing page off.
+     * The domains a landing page is served on. An empty list turns that landing page off.
      *
      * @return array<int, string>
      */
-    public static function landingPageDomains(): array
+    public static function landingPageDomains(LandingPage $page): array
     {
-        $stored = self::get(self::LANDING_PAGE_DOMAINS);
+        $key = $page->domainsSettingKey();
 
-        return self::normalizeDomains($stored === null ? config('landing.domains', []) : self::getArray(self::LANDING_PAGE_DOMAINS));
+        return self::normalizeDomains(self::get($key) === null
+            ? config("{$page->configKey()}.domains", [])
+            : self::getArray($key));
     }
 
     /**
-     * Whether a request host should be served the landing page. The www. variant matches too.
+     * The landing page served on a request host, if any. The www. variant of a domain matches too.
      */
-    public static function isLandingPageHost(string $host): bool
+    public static function landingPageForHost(string $host): ?LandingPage
     {
         $host = self::normalizeDomain($host);
-        $domains = self::landingPageDomains();
+        $bareHost = Str::startsWith($host, 'www.') ? Str::after($host, 'www.') : $host;
 
-        return in_array($host, $domains, true)
-            || (Str::startsWith($host, 'www.') && in_array(Str::after($host, 'www.'), $domains, true));
+        foreach (LandingPage::cases() as $page) {
+            $domains = self::landingPageDomains($page);
+
+            if (in_array($host, $domains, true) || in_array($bareHost, $domains, true)) {
+                return $page;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -562,10 +568,10 @@ class Setting extends Model
      *
      * @return array<string, array<string, mixed>>
      */
-    public static function landingPageContentState(): array
+    public static function landingPageContentState(LandingPage $page): array
     {
-        $defaults = Arr::except(config('landing', []), ['domains']);
-        $stored = self::getArray(self::LANDING_PAGE_CONTENT);
+        $defaults = Arr::except(config($page->configKey(), []), ['domains']);
+        $stored = self::getArray($page->contentSettingKey());
         $state = [];
 
         foreach ($defaults as $section => $values) {
@@ -579,13 +585,13 @@ class Setting extends Model
     }
 
     /**
-     * Landing page content resolved for the public page. Text keeps its **highlight** markers.
+     * Landing page 3 (contact) content resolved for the public page. Text keeps its **highlight** markers.
      *
      * @return array<string, mixed>
      */
-    public static function landingPageContent(): array
+    public static function contactLandingContent(): array
     {
-        $content = self::landingPageContentState();
+        $content = self::landingPageContentState(LandingPage::Contact);
         $text = fn (string $section, string $key): string => trim((string) ($content[$section][$key] ?? ''));
         $optional = fn (mixed $value): ?string => ($value = trim((string) $value)) !== '' ? $value : null;
         $image = fn (string $section, string $key): ?string => self::homepageImageUrl($content[$section][$key] ?? null);
@@ -666,6 +672,99 @@ class Setting extends Model
     }
 
     /**
+     * Landing page 2 (products) content resolved for the public page. Text keeps its **highlight** markers.
+     *
+     * @return array<string, mixed>
+     */
+    public static function productsLandingContent(): array
+    {
+        $content = self::landingPageContentState(LandingPage::Products);
+        $text = fn (string $section, string $key): string => trim((string) ($content[$section][$key] ?? ''));
+        $buttonUrl = fn (string $section): string => trim((string) ($content[$section]['button_url'] ?? '')) ?: '#pricing';
+        $items = fn (string $section): array => self::normalizeFeatures($content[$section]['items'] ?? [], 20);
+
+        return [
+            'seo' => [
+                'title' => $text('seo', 'title'),
+                'description' => $text('seo', 'description'),
+            ],
+            'hero' => [
+                'badge' => $text('hero', 'badge'),
+                'title' => $text('hero', 'title'),
+                'subtitle' => $text('hero', 'subtitle'),
+                'paragraphs' => self::paragraphs($text('hero', 'body')),
+                'image' => self::homepageImageUrl($content['hero']['image'] ?? null, $content['hero']['default_image'] ?? null),
+                'buttonLabel' => $text('hero', 'button_label'),
+                'buttonUrl' => $buttonUrl('hero'),
+            ],
+            'whyChoose' => [
+                'heading' => $text('why_choose', 'heading'),
+                'items' => $items('why_choose'),
+            ],
+            'consistency' => [
+                'heading' => $text('consistency', 'heading'),
+                'intro' => $text('consistency', 'intro'),
+                'items' => $items('consistency'),
+                'note' => $text('consistency', 'note'),
+            ],
+            'setup' => [
+                'heading' => $text('setup', 'heading'),
+                'steps' => collect(is_array($content['setup']['steps'] ?? null) ? $content['setup']['steps'] : [])
+                    ->map(fn (mixed $step): string => is_string($step) ? trim($step) : '')
+                    ->filter()
+                    ->values()
+                    ->all(),
+            ],
+            'included' => [
+                'heading' => $text('included', 'heading'),
+                'items' => $items('included'),
+            ],
+            'pricing' => [
+                'heading' => $text('pricing', 'heading'),
+                'body' => $text('pricing', 'body'),
+                'showPlans' => (bool) ($content['pricing']['show_plans'] ?? false),
+                'buttonLabel' => $text('pricing', 'button_label'),
+                'buttonUrl' => trim((string) ($content['pricing']['button_url'] ?? '')) ?: null,
+            ],
+            'faq' => [
+                'heading' => $text('faq', 'heading'),
+                'items' => collect(is_array($content['faq']['items'] ?? null) ? $content['faq']['items'] : [])
+                    ->filter(fn (mixed $item): bool => is_array($item))
+                    ->map(fn (array $item): array => [
+                        'question' => trim((string) ($item['question'] ?? '')),
+                        'answer' => trim((string) ($item['answer'] ?? '')),
+                    ])
+                    ->values()
+                    ->all(),
+            ],
+            'risk' => [
+                'heading' => $text('risk', 'heading'),
+                'body' => $text('risk', 'body'),
+            ],
+            'cta' => [
+                'heading' => $text('cta', 'heading'),
+                'body' => $text('cta', 'body'),
+                'buttonLabel' => $text('cta', 'button_label'),
+                'buttonUrl' => $buttonUrl('cta'),
+            ],
+        ];
+    }
+
+    /**
+     * Split text on blank lines into trimmed paragraphs.
+     *
+     * @return array<int, string>
+     */
+    private static function paragraphs(string $text): array
+    {
+        return collect(preg_split('/(\r\n|\r|\n)\s*(\r\n|\r|\n)/', $text) ?: [])
+            ->map(fn (string $paragraph): string => trim($paragraph))
+            ->filter()
+            ->values()
+            ->all();
+    }
+
+    /**
      * Resolve an uploaded file path (or bundled /img path) to a public URL.
      */
     public static function homepageImageUrl(mixed $path, mixed $default = null): ?string
@@ -742,6 +841,24 @@ class Setting extends Model
         return $normalized === []
             ? self::normalizePricingPackages(self::defaultPricingPackages())
             : $normalized;
+    }
+
+    /**
+     * Pricing packages shaped for the public pricing cards.
+     *
+     * @return array<int, array{slug: string, name: string, accessDuration: string, amount: float, oldAmount: float, features: array<int, string>, badge: string|null}>
+     */
+    public static function pricingPackageProps(): array
+    {
+        return array_map(fn (array $package): array => [
+            'slug' => $package['slug'],
+            'name' => $package['name'],
+            'accessDuration' => $package['access_duration'],
+            'amount' => $package['amount'],
+            'oldAmount' => $package['old_amount'],
+            'features' => $package['features'],
+            'badge' => $package['badge'],
+        ], self::pricingPackages());
     }
 
     /**

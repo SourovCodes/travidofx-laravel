@@ -2,11 +2,11 @@
 
 /*
 |--------------------------------------------------------------------------
-| Landing page defaults
+| Landing page 3 (contact) defaults
 |--------------------------------------------------------------------------
 |
-| The landing page is served on its own domains (set in Landing page
-| settings). These values are used whenever an admin has not saved a
+| The landing page is served on its own domains (set in its admin
+| settings page). These values are used whenever an admin has not saved a
 | custom value. Text marked as "highlight" turns **wrapped words** green.
 |
 */

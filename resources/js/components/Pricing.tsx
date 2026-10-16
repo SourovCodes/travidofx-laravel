@@ -18,14 +18,27 @@ const BADGES = {
     best_value: { label: 'Best Value', tone: 'best' },
 } satisfies Record<string, { label: string; tone: 'popular' | 'best' }>;
 
-export default function Pricing({ packages }: { packages: PricingPackage[] }) {
+/**
+ * Pricing cards. Pass checkoutBaseUrl when rendered off the main domain, so buy
+ * buttons do a full page load to the main website's checkout.
+ */
+export default function Pricing({
+    packages,
+    checkoutBaseUrl,
+}: {
+    packages: PricingPackage[];
+    checkoutBaseUrl?: string;
+}) {
     return (
         <section id="prices" className="relative bg-black pb-20 md:pb-24">
             <div className="container-x">
                 <div className={pricingGridClass(packages.length)}>
                     {packages.map((plan, i) => (
                         <Reveal key={plan.slug} delay={i * 80}>
-                            <PlanCard plan={plan} />
+                            <PlanCard
+                                plan={plan}
+                                checkoutBaseUrl={checkoutBaseUrl}
+                            />
                         </Reveal>
                     ))}
                 </div>
@@ -39,7 +52,14 @@ export default function Pricing({ packages }: { packages: PricingPackage[] }) {
     );
 }
 
-function PlanCard({ plan }: { plan: Plan }) {
+function PlanCard({
+    plan,
+    checkoutBaseUrl,
+}: {
+    plan: Plan;
+    checkoutBaseUrl?: string;
+}) {
+    const checkoutPath = `/checkout?plan=${encodeURIComponent(plan.slug)}`;
     const ribbon = plan.badge ? BADGES[plan.badge] : null;
     const hasOldPrice = plan.oldAmount > plan.amount;
 
@@ -133,12 +153,18 @@ function PlanCard({ plan }: { plan: Plan }) {
             </ul>
 
             <div className="flex justify-center px-5 pb-8">
-                <Link
-                    href={`/checkout?plan=${encodeURIComponent(plan.slug)}`}
-                    className="btn-elementor"
-                >
-                    Get it Now
-                </Link>
+                {checkoutBaseUrl ? (
+                    <a
+                        href={`${checkoutBaseUrl}${checkoutPath}`}
+                        className="btn-elementor"
+                    >
+                        Get it Now
+                    </a>
+                ) : (
+                    <Link href={checkoutPath} className="btn-elementor">
+                        Get it Now
+                    </Link>
+                )}
             </div>
         </div>
     );

@@ -1,5 +1,6 @@
 import { Head } from '@inertiajs/react';
-import { Fragment, useState } from 'react';
+import { useState } from 'react';
+import HighlightedText from '@/components/HighlightedText';
 import LandingIcon from '@/components/LandingIcon';
 import { cn } from '@/lib/utils';
 import type {
@@ -68,7 +69,7 @@ const COLORS: Record<
 };
 
 /**
- * Render text where **wrapped** words are highlighted, keeping line breaks.
+ * Admin text with **wrapped** words in green, unless another highlight color is given.
  */
 function Highlighted({
     text,
@@ -77,20 +78,9 @@ function Highlighted({
     text: string;
     highlightClassName?: string;
 }) {
-    return text.split('\n').map((line, lineIndex) => (
-        <Fragment key={lineIndex}>
-            {lineIndex > 0 && <br />}
-            {line.split(/\*\*(.+?)\*\*/g).map((part, partIndex) =>
-                partIndex % 2 === 1 ? (
-                    <span key={partIndex} className={highlightClassName}>
-                        {part}
-                    </span>
-                ) : (
-                    part
-                ),
-            )}
-        </Fragment>
-    ));
+    return (
+        <HighlightedText text={text} highlightClassName={highlightClassName} />
+    );
 }
 
 function plainText(text: string): string {

@@ -1,53 +1,66 @@
 <?php
 
-use App\Filament\Pages\LandingPageSettings;
+use App\Enums\LandingPage;
+use App\Filament\Pages\ContactLandingPageSettings;
+use App\Filament\Pages\ProductsLandingPageSettings;
 use App\Models\Setting;
 use Filament\Forms\Components\Repeater;
 use Livewire\Livewire;
 
-test('landing domains render the landing page while the main domain keeps the homepage', function () {
+test('each landing domain renders its own landing page while the main domain keeps the homepage', function () {
     $this->get('http://localhost/')
         ->assertOk()
         ->assertInertia(fn ($page) => $page->component('home'));
 
-    $content = $this->get('http://info.tradivofx.com/')
+    $contact = $this->get('http://info.tradivofx.com/')
         ->assertOk()
-        ->assertInertia(fn ($page) => $page->component('landing'))
+        ->assertInertia(fn ($page) => $page->component('landing/contact'))
         ->inertiaProps('content');
 
-    expect($content['hero']['title'])->toBe("Trade Smarter\nwith **Profit Shield EA**")
-        ->and($content['contact']['items'])->toHaveCount(8)
-        ->and($content['contact']['items'][1])->toMatchArray(['url' => null, 'copyValue' => '@ProfitShieldEA'])
-        ->and($content['footer']['socialLinks'])->toHaveCount(3);
+    expect($contact['hero']['title'])->toBe("Trade Smarter\nwith **Profit Shield EA**")
+        ->and($contact['contact']['items'])->toHaveCount(8)
+        ->and($contact['contact']['items'][1])->toMatchArray(['url' => null, 'copyValue' => '@ProfitShieldEA'])
+        ->and($contact['footer']['socialLinks'])->toHaveCount(3);
+
+    $products = $this->get('http://products.tradivofx.com/')
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page->component('landing/products'));
+
+    expect($products->inertiaProps('content.hero.title'))->toBe('Trade Smarter with **Tradivo Magic EA** for MT5')
+        ->and($products->inertiaProps('content.hero.paragraphs'))->toHaveCount(2)
+        ->and($products->inertiaProps('content.hero.image'))->toBe('/img/tradivo-package.jpeg')
+        ->and($products->inertiaProps('content.hero.buttonUrl'))->toBe('#pricing')
+        ->and($products->inertiaProps('content.setup.steps'))->toHaveCount(4)
+        ->and($products->inertiaProps('pricingPackages'))->toEqual(Setting::pricingPackageProps());
 });
 
 test('every saved landing domain and its www variant serve the landing page', function (string $host) {
-    Setting::set(Setting::LANDING_PAGE_DOMAINS, ['info.tradivofx.com', 'info-mirror.tradivofx.com']);
+    Setting::set(LandingPage::Contact->domainsSettingKey(), ['info.tradivofx.com', 'info-mirror.tradivofx.com']);
 
     $this->get("http://{$host}/")
         ->assertOk()
-        ->assertInertia(fn ($page) => $page->component('landing'));
+        ->assertInertia(fn ($page) => $page->component('landing/contact'));
 })->with(['info.tradivofx.com', 'info-mirror.tradivofx.com', 'www.info-mirror.tradivofx.com']);
 
-test('other paths on a landing domain redirect to the main website', function () {
+test('other paths on a landing domain redirect to the main website', function (string $host) {
     config(['app.url' => 'https://tradivofx.com']);
 
-    $this->get('http://info.tradivofx.com/checkout?plan=pro')
+    $this->get("http://{$host}/checkout?plan=pro")
         ->assertRedirect('https://tradivofx.com/checkout?plan=pro');
-});
+})->with(['info.tradivofx.com', 'products.tradivofx.com']);
 
-test('removing every domain turns the landing page off', function () {
-    Setting::set(Setting::LANDING_PAGE_DOMAINS, []);
+test('removing every domain turns a landing page off', function () {
+    Setting::set(LandingPage::Products->domainsSettingKey(), []);
 
-    $this->get('http://info.tradivofx.com/')
+    $this->get('http://products.tradivofx.com/')
         ->assertOk()
         ->assertInertia(fn ($page) => $page->component('home'));
 });
 
-test('admin can manage landing domains and content', function () {
+test('admin can manage contact landing domains and content', function () {
     $undoRepeaterFake = Repeater::fake();
 
-    Livewire::test(LandingPageSettings::class)
+    Livewire::test(ContactLandingPageSettings::class)
         ->fillForm([
             'domains' => ['https://Info.Tradivofx.com/', 'offer.example.com', 'offer.example.com'],
             'content.hero.title' => 'Grow with **Shield**',
@@ -69,7 +82,7 @@ test('admin can manage landing domains and content', function () {
 
     $undoRepeaterFake();
 
-    expect(Setting::landingPageDomains())->toBe(['info.tradivofx.com', 'offer.example.com']);
+    expect(Setting::landingPageDomains(LandingPage::Contact))->toBe(['info.tradivofx.com', 'offer.example.com']);
 
     $content = $this->get('http://offer.example.com/')->inertiaProps('content');
 
@@ -85,19 +98,49 @@ test('admin can manage landing domains and content', function () {
         ]]);
 });
 
-test('admin cannot use an invalid domain or the main website domain', function (string $domain) {
+test('admin can manage products landing domains and content', function () {
+    $undoRepeaterFake = Repeater::fake();
+
+    Livewire::test(ProductsLandingPageSettings::class)
+        ->fillForm([
+            'domains' => ['products.tradivofx.com', 'ea.example.com'],
+            'content.hero.body' => "First paragraph.\n\nSecond paragraph.\n\nThird paragraph.",
+            'content.hero.button_url' => 'https://tradivofx.com/checkout?plan=pro',
+            'content.setup.steps' => [['text' => 'Buy a license.'], ['text' => 'Install it.']],
+            'content.why_choose.items' => ['Fast setup'],
+            'content.pricing.show_plans' => false,
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors()
+        ->assertNotified('Landing page saved');
+
+    $undoRepeaterFake();
+
+    $content = $this->get('http://ea.example.com/')
+        ->assertInertia(fn ($page) => $page->component('landing/products'))
+        ->inertiaProps('content');
+
+    expect($content['hero']['paragraphs'])->toBe(['First paragraph.', 'Second paragraph.', 'Third paragraph.'])
+        ->and($content['hero']['buttonUrl'])->toBe('https://tradivofx.com/checkout?plan=pro')
+        ->and($content['setup']['steps'])->toBe(['Buy a license.', 'Install it.'])
+        ->and($content['whyChoose']['items'])->toBe(['Fast setup'])
+        ->and($content['pricing']['showPlans'])->toBeFalse()
+        ->and($content['cta']['buttonUrl'])->toBe('#pricing');
+});
+
+test('admin cannot use an invalid domain, the main website domain, or another landing page domain', function (string $domain) {
     config(['app.url' => 'https://tradivofx.com']);
 
-    Livewire::test(LandingPageSettings::class)
+    Livewire::test(ProductsLandingPageSettings::class)
         ->fillForm(['domains' => [$domain]])
         ->call('save')
         ->assertHasFormErrors(['domains.0']);
-})->with(['not a domain', 'tradivofx.com']);
+})->with(['not a domain', 'tradivofx.com', 'info.tradivofx.com']);
 
 test('contact rows reject links that are not web, email or phone links', function () {
     $undoRepeaterFake = Repeater::fake();
 
-    Livewire::test(LandingPageSettings::class)
+    Livewire::test(ContactLandingPageSettings::class)
         ->fillForm([
             'content.contact.items' => [
                 ['icon' => 'globe', 'color' => 'blue', 'title' => 'Site', 'button_label' => 'Open', 'url' => 'javascript:alert(1)'],
