@@ -21,6 +21,9 @@ export default defineConfig({
                 bunny('Roboto Slab', {
                     weights: [400, 500, 600],
                 }),
+                bunny('Kaushan Script', {
+                    weights: [400],
+                }),
             ],
         }),
         inertia(),

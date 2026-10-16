@@ -5,9 +5,8 @@
 
     RewriteEngine On
 
-    # Force HTTPS On Production (cPanel's AutoSSL needs /.well-known over HTTP)...
+    # Force HTTPS (cPanel's AutoSSL needs /.well-known over HTTP)...
     RewriteCond %{HTTPS} off
-    RewriteCond %{HTTP_HOST} ^(www\.)?tradivofx\.com$ [NC]
     RewriteCond %{REQUEST_URI} !^/\.well-known/
     RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 

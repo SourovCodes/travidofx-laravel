@@ -11,7 +11,7 @@ const PAYMENTS = [
     { src: '/img/pay-4.png', alt: 'Payment 4' },
 ];
 
-const SOCIAL_ICON_PATHS: Record<string, string> = {
+export const SOCIAL_ICON_PATHS: Record<string, string> = {
     facebook:
         'M22 12a10 10 0 1 0-11.56 9.88V14.9H7.9V12h2.54V9.8c0-2.51 1.49-3.9 3.78-3.9 1.1 0 2.24.2 2.24.2v2.47h-1.27c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.44 2.9h-2.34v6.98A10 10 0 0 0 22 12z',
     instagram:

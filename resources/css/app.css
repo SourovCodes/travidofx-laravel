@@ -34,6 +34,7 @@
     --font-mulish: 'Mulish', system-ui, sans-serif;
     --font-roboto: 'Roboto', system-ui, sans-serif;
     --font-roboto-slab: 'Roboto Slab', Georgia, serif;
+    --font-script: 'Kaushan Script', 'Brush Script MT', cursive;
 
     --font-sans: var(--font-roboto), 'Roboto', system-ui, sans-serif;
     --font-display: var(--font-mulish), 'Mulish', system-ui, sans-serif;

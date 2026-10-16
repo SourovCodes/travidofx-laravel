@@ -6,13 +6,18 @@ use App\Enums\ProductGalleryStatus;
 use App\Models\ProductGalleryItem;
 use App\Models\Review;
 use App\Models\Setting;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class HomeController extends Controller
 {
-    public function index(): Response
+    public function index(Request $request, LandingPageController $landingPage): Response
     {
+        if (Setting::isLandingPageHost($request->getHost())) {
+            return $landingPage();
+        }
+
         $reviews = Review::published()
             ->orderByDesc('featured')
             ->orderByDesc('created_at')

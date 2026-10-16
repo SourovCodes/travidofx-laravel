@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -59,6 +60,49 @@ class Setting extends Model
         ['platform' => 'instagram', 'url' => 'https://instagram.com/tradivorobot'],
         ['platform' => 'tiktok', 'url' => 'https://tiktok.com/@tradivo.robot'],
         ['platform' => 'youtube', 'url' => 'https://www.youtube.com/@Tradivo_Robot'],
+    ];
+
+    public const LANDING_PAGE_CONTENT = 'landing_page_content';
+
+    public const LANDING_PAGE_DOMAINS = 'landing_page_domains';
+
+    /** @var array<string, string> */
+    public const LANDING_ICONS = [
+        'telegram' => 'Telegram',
+        'whatsapp' => 'WhatsApp',
+        'facebook' => 'Facebook',
+        'messenger' => 'Messenger',
+        'instagram' => 'Instagram',
+        'youtube' => 'YouTube',
+        'tiktok' => 'TikTok',
+        'x' => 'X (Twitter)',
+        'discord' => 'Discord',
+        'users' => 'Group',
+        'globe' => 'Globe',
+        'cart' => 'Shopping cart',
+        'email' => 'Email',
+        'phone' => 'Phone',
+        'shield' => 'Shield',
+        'gear' => 'Gear',
+        'chart' => 'Chart',
+        'headset' => 'Headset',
+        'heart' => 'Heart',
+        'star' => 'Star',
+        'check' => 'Check mark',
+        'lock' => 'Lock',
+        'bolt' => 'Lightning bolt',
+    ];
+
+    /** @var array<string, string> */
+    public const LANDING_COLORS = [
+        'blue' => 'Blue',
+        'green' => 'Green',
+        'purple' => 'Purple',
+        'orange' => 'Orange',
+        'teal' => 'Teal',
+        'pink' => 'Pink',
+        'red' => 'Red',
+        'slate' => 'Slate',
     ];
 
     /** @var array<string, string> */
@@ -458,6 +502,165 @@ class Setting extends Model
                 'subtitle' => $text('contact', 'subtitle'),
                 'ctaHeading' => $text('contact', 'cta_heading'),
                 'ctaBody' => $text('contact', 'cta_body'),
+            ],
+        ];
+    }
+
+    /**
+     * The domains the landing page is served on. An empty list turns the landing page off.
+     *
+     * @return array<int, string>
+     */
+    public static function landingPageDomains(): array
+    {
+        $stored = self::get(self::LANDING_PAGE_DOMAINS);
+
+        return self::normalizeDomains($stored === null ? config('landing.domains', []) : self::getArray(self::LANDING_PAGE_DOMAINS));
+    }
+
+    /**
+     * Whether a request host should be served the landing page. The www. variant matches too.
+     */
+    public static function isLandingPageHost(string $host): bool
+    {
+        $host = self::normalizeDomain($host);
+        $domains = self::landingPageDomains();
+
+        return in_array($host, $domains, true)
+            || (Str::startsWith($host, 'www.') && in_array(Str::after($host, 'www.'), $domains, true));
+    }
+
+    /**
+     * @param  array<array-key, mixed>  $domains
+     * @return array<int, string>
+     */
+    public static function normalizeDomains(array $domains): array
+    {
+        return collect($domains)
+            ->map(fn (mixed $domain): string => self::normalizeDomain($domain))
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    /**
+     * Reduce a pasted domain or URL to a bare lowercase host name.
+     */
+    public static function normalizeDomain(mixed $value): string
+    {
+        $value = Str::lower(trim((string) $value));
+        $value = (string) preg_replace('#^[a-z][a-z0-9+.-]*://#', '', $value);
+        $value = Str::before(Str::before(Str::before($value, '/'), '?'), '#');
+        $value = Str::before($value, ':');
+
+        return rtrim($value, '.');
+    }
+
+    /**
+     * Raw landing page content: config defaults with any saved sections layered on top.
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    public static function landingPageContentState(): array
+    {
+        $defaults = Arr::except(config('landing', []), ['domains']);
+        $stored = self::getArray(self::LANDING_PAGE_CONTENT);
+        $state = [];
+
+        foreach ($defaults as $section => $values) {
+            $state[$section] = array_replace(
+                $values,
+                is_array($stored[$section] ?? null) ? $stored[$section] : [],
+            );
+        }
+
+        return $state;
+    }
+
+    /**
+     * Landing page content resolved for the public page. Text keeps its **highlight** markers.
+     *
+     * @return array<string, mixed>
+     */
+    public static function landingPageContent(): array
+    {
+        $content = self::landingPageContentState();
+        $text = fn (string $section, string $key): string => trim((string) ($content[$section][$key] ?? ''));
+        $optional = fn (mixed $value): ?string => ($value = trim((string) $value)) !== '' ? $value : null;
+        $image = fn (string $section, string $key): ?string => self::homepageImageUrl($content[$section][$key] ?? null);
+        $icon = fn (mixed $value, string $default): string => array_key_exists((string) $value, self::LANDING_ICONS) ? (string) $value : $default;
+        $color = fn (mixed $value): string => array_key_exists((string) $value, self::LANDING_COLORS) ? (string) $value : 'blue';
+        $list = fn (string $section, string $key): array => array_values(array_filter(
+            is_array($content[$section][$key] ?? null) ? $content[$section][$key] : [],
+            'is_array',
+        ));
+
+        return [
+            'seo' => [
+                'title' => $text('seo', 'title'),
+                'description' => $text('seo', 'description'),
+            ],
+            'header' => [
+                'logo' => $image('header', 'logo'),
+                'brand' => $text('header', 'brand'),
+                'tagline' => $text('header', 'tagline'),
+            ],
+            'hero' => [
+                'badge' => $text('hero', 'badge'),
+                'title' => $text('hero', 'title'),
+                'body' => $text('hero', 'body'),
+                'image' => $image('hero', 'image'),
+                'note' => $text('hero', 'note'),
+                'platformLabel' => $text('hero', 'platform_label'),
+                'features' => array_map(fn (array $feature): array => [
+                    'icon' => $icon($feature['icon'] ?? null, 'check'),
+                    'label' => trim((string) ($feature['label'] ?? '')),
+                ], $list('hero', 'features')),
+            ],
+            'contact' => [
+                'heading' => $text('contact', 'heading'),
+                'subtitle' => $text('contact', 'subtitle'),
+                'items' => array_map(fn (array $item): array => [
+                    'icon' => $icon($item['icon'] ?? null, 'globe'),
+                    'color' => $color($item['color'] ?? null),
+                    'title' => trim((string) ($item['title'] ?? '')),
+                    'subtitle' => trim((string) ($item['subtitle'] ?? '')),
+                    'buttonLabel' => trim((string) ($item['button_label'] ?? '')),
+                    'url' => $optional($item['url'] ?? null),
+                    'copyValue' => $optional($item['copy_value'] ?? null),
+                ], $list('contact', 'items')),
+            ],
+            'about' => [
+                'enabled' => (bool) ($content['about']['enabled'] ?? false),
+                'badge' => $text('about', 'badge'),
+                'title' => $text('about', 'title'),
+                'body' => $text('about', 'body'),
+                'tagline' => $text('about', 'tagline'),
+                'image' => $image('about', 'image'),
+                'features' => array_map(fn (array $feature): array => [
+                    'icon' => $icon($feature['icon'] ?? null, 'check'),
+                    'color' => $color($feature['color'] ?? null),
+                    'title' => trim((string) ($feature['title'] ?? '')),
+                    'subtitle' => trim((string) ($feature['subtitle'] ?? '')),
+                ], $list('about', 'features')),
+            ],
+            'highlights' => array_map(fn (array $item): array => [
+                'icon' => $icon($item['icon'] ?? null, 'check'),
+                'title' => trim((string) ($item['title'] ?? '')),
+                'subtitle' => trim((string) ($item['subtitle'] ?? '')),
+            ], $list('highlights', 'items')),
+            'footer' => [
+                'tagline' => $text('footer', 'tagline'),
+                'socialLinks' => collect(self::normalizeSocialLinkRows($list('footer', 'social_links')))
+                    ->filter(fn (array $row): bool => $row['url'] !== null)
+                    ->map(fn (array $row): array => [
+                        'platform' => $row['platform'],
+                        'label' => self::SOCIAL_PLATFORMS[$row['platform']],
+                        'url' => $row['url'],
+                    ])
+                    ->values()
+                    ->all(),
             ],
         ];
     }
