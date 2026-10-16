@@ -50,7 +50,10 @@ export default function Home({
                 <Hero content={content.hero} />
                 <SuccessKeys content={content.successKeys} />
                 <TiltBand />
-                <Description content={content.description} />
+                <Description
+                    content={content.description}
+                    investorAccount={content.investorAccount}
+                />
                 <Results content={content.results} />
                 <WhyChoose content={content.whyChoose} />
                 <FanBand />

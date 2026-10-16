@@ -43,6 +43,7 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
             ],
             'contact' => fn () => Setting::contactLinks(),
+            'socialLinks' => fn () => Setting::socialLinks(),
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),

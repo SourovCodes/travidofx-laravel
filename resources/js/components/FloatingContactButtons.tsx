@@ -1,10 +1,8 @@
 import { usePage } from '@inertiajs/react';
 
-const DEFAULT_MESSAGE = "Hi! I'd like to know more about Tradivo Magic EA V12.";
-
 export default function FloatingContactButtons() {
     const { contact } = usePage().props;
-    const whatsappHref = `${contact.whatsapp.url}?text=${encodeURIComponent(DEFAULT_MESSAGE)}`;
+    const whatsappHref = contact.whatsapp.chatUrl;
 
     return (
         <div className="fixed right-5 bottom-5 z-[60] flex flex-col items-end gap-3">

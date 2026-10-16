@@ -20,7 +20,31 @@ test('homepage renders the original content when nothing is saved', function () 
         ->and($content['results']['heading'])->toBe('Unlock the Full Power of Automated Trading with Tradivo')
         ->and($content['results']['image'])->toBe('/img/v12-balance.png')
         ->and($content['description']['packageImage'])->toBe('/img/tradivo-package.jpeg')
-        ->and($content['faq']['items'])->toHaveCount(12);
+        ->and($content['faq']['items'])->toHaveCount(12)
+        ->and($content['investorAccount']['enabled'])->toBeTrue()
+        ->and($content['investorAccount']['rows'])->toHaveCount(3);
+});
+
+test('admin can edit the investor account card', function () {
+    $undoRepeaterFake = Repeater::fake();
+
+    Livewire::test(HomepageSettings::class)
+        ->fillForm([
+            'content.investor_account.rows' => [
+                ['icon' => 'server', 'label' => 'Server:', 'value' => 'Exness-MT5Real8'],
+            ],
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    $undoRepeaterFake();
+
+    $investor = $this->get(route('home'))->inertiaProps('content.investorAccount');
+
+    expect($investor['rows'])->toBe([
+        ['icon' => 'server', 'label' => 'Server:', 'value' => 'Exness-MT5Real8'],
+    ])
+        ->and($investor['title'])->toBe('Investor Account Information');
 });
 
 test('admin can save homepage content with separate hero layers', function () {

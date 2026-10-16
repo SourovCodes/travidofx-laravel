@@ -31,6 +31,36 @@ class Setting extends Model
 
     public const DEFAULT_TELEGRAM_URL = 'https://t.me/tradivorobot';
 
+    public const CONTACT_WHATSAPP_MESSAGE = 'contact_whatsapp_message';
+
+    public const DEFAULT_WHATSAPP_MESSAGE = "Hi! I'd like to know more about Tradivo Magic EA V12.";
+
+    public const SOCIAL_LINKS = 'social_links';
+
+    /** @var array<string, string> */
+    public const SOCIAL_PLATFORMS = [
+        'whatsapp' => 'WhatsApp',
+        'telegram' => 'Telegram',
+        'facebook' => 'Facebook',
+        'instagram' => 'Instagram',
+        'tiktok' => 'TikTok',
+        'youtube' => 'YouTube',
+        'x' => 'X (Twitter)',
+        'linkedin' => 'LinkedIn',
+        'discord' => 'Discord',
+        'website' => 'Website',
+    ];
+
+    /** @var array<int, array{platform: string, url: string|null}> */
+    public const DEFAULT_SOCIAL_LINKS = [
+        ['platform' => 'whatsapp', 'url' => null],
+        ['platform' => 'telegram', 'url' => null],
+        ['platform' => 'facebook', 'url' => 'https://facebook.com/tradivorobot'],
+        ['platform' => 'instagram', 'url' => 'https://instagram.com/tradivorobot'],
+        ['platform' => 'tiktok', 'url' => 'https://tiktok.com/@tradivo.robot'],
+        ['platform' => 'youtube', 'url' => 'https://www.youtube.com/@Tradivo_Robot'],
+    ];
+
     /** @var array<string, string> */
     public const PRICING_BADGE_OPTIONS = [
         self::PRICING_BADGE_POPULAR => 'Popular',
@@ -147,23 +177,109 @@ class Setting extends Model
 
     /**
      * @return array{
-     *     whatsapp: array{number: string, url: string},
+     *     whatsapp: array{number: string, url: string, message: string, chatUrl: string},
      *     telegram: array{url: string}
      * }
      */
     public static function contactLinks(): array
     {
         $whatsappNumber = self::whatsappNumber();
+        $whatsappUrl = "https://wa.me/{$whatsappNumber}";
+        $whatsappMessage = self::whatsappMessage();
 
         return [
             'whatsapp' => [
                 'number' => $whatsappNumber,
-                'url' => "https://wa.me/{$whatsappNumber}",
+                'url' => $whatsappUrl,
+                'message' => $whatsappMessage,
+                'chatUrl' => $whatsappMessage !== ''
+                    ? $whatsappUrl.'?text='.rawurlencode($whatsappMessage)
+                    : $whatsappUrl,
             ],
             'telegram' => [
                 'url' => self::telegramUrl(),
             ],
         ];
+    }
+
+    /**
+     * Raw social link rows as edited in admin.
+     *
+     * @return array<int, array{platform: string, url: string|null}>
+     */
+    public static function socialLinkRows(): array
+    {
+        $stored = self::get(self::SOCIAL_LINKS);
+
+        if ($stored === null) {
+            return self::DEFAULT_SOCIAL_LINKS;
+        }
+
+        return self::normalizeSocialLinkRows(self::getArray(self::SOCIAL_LINKS));
+    }
+
+    /**
+     * Footer social links. WhatsApp and Telegram rows without a URL use the contact settings links.
+     *
+     * @return array<int, array{platform: string, label: string, url: string}>
+     */
+    public static function socialLinks(): array
+    {
+        $contact = self::contactLinks();
+        $links = [];
+
+        foreach (self::socialLinkRows() as $row) {
+            $url = $row['url'] ?? null;
+
+            $url ??= match ($row['platform']) {
+                'whatsapp' => $contact['whatsapp']['chatUrl'],
+                'telegram' => $contact['telegram']['url'],
+                default => null,
+            };
+
+            if ($url === null) {
+                continue;
+            }
+
+            $links[] = [
+                'platform' => $row['platform'],
+                'label' => self::SOCIAL_PLATFORMS[$row['platform']],
+                'url' => $url,
+            ];
+        }
+
+        return $links;
+    }
+
+    /**
+     * @param  array<array-key, mixed>  $rows
+     * @return array<int, array{platform: string, url: string|null}>
+     */
+    public static function normalizeSocialLinkRows(array $rows): array
+    {
+        $normalized = [];
+
+        foreach ($rows as $row) {
+            $platform = is_array($row) ? ($row['platform'] ?? null) : null;
+
+            if (! is_string($platform) || ! array_key_exists($platform, self::SOCIAL_PLATFORMS)) {
+                continue;
+            }
+
+            $url = trim((string) ($row['url'] ?? ''));
+
+            $normalized[] = [
+                'platform' => $platform,
+                'url' => $url !== '' ? $url : null,
+            ];
+        }
+
+        return $normalized;
+    }
+
+    public static function whatsappMessage(): string
+    {
+        return trim((string) self::get(self::CONTACT_WHATSAPP_MESSAGE, self::DEFAULT_WHATSAPP_MESSAGE));
     }
 
     public static function whatsappNumber(): string
@@ -277,6 +393,17 @@ class Setting extends Model
                 'disclaimer' => $text('description', 'disclaimer'),
                 'packageImage' => $image('description', 'package_image'),
                 'iconImage' => $image('description', 'icon_image'),
+            ],
+            'investorAccount' => [
+                'enabled' => (bool) ($content['investor_account']['enabled'] ?? false),
+                'title' => $text('investor_account', 'title'),
+                'intro' => $text('investor_account', 'intro'),
+                'rows' => array_map(fn (array $row): array => [
+                    'icon' => (string) ($row['icon'] ?? 'user'),
+                    'label' => trim((string) ($row['label'] ?? '')),
+                    'value' => trim((string) ($row['value'] ?? '')),
+                ], $list('investor_account', 'rows')),
+                'tagline' => $text('investor_account', 'tagline'),
             ],
             'results' => [
                 'source' => $text('results', 'source'),

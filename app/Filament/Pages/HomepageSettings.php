@@ -50,6 +50,7 @@ class HomepageSettings extends Page implements HasForms
         ['success_keys', 'items'],
         ['why_choose', 'items'],
         ['installation', 'stats'],
+        ['investor_account', 'rows'],
         ['faq', 'items'],
     ];
 
@@ -61,6 +62,15 @@ class HomepageSettings extends Page implements HasForms
         'shield' => 'Shield',
         'infinity' => 'Infinity',
         'monitor' => 'Monitor',
+    ];
+
+    /** @var array<string, string> */
+    private const INVESTOR_ICON_OPTIONS = [
+        'server' => 'Server',
+        'user' => 'User',
+        'lock' => 'Lock',
+        'key' => 'Key',
+        'globe' => 'Globe',
     ];
 
     private const MARKDOWN_HINT = 'Wrap words in **double asterisks** for bold. New lines are kept.';
@@ -104,6 +114,7 @@ class HomepageSettings extends Page implements HasForms
                         $this->heroTab(),
                         $this->successKeysTab(),
                         $this->descriptionTab(),
+                        $this->investorAccountTab(),
                         $this->resultsTab(),
                         $this->whyChooseTab(),
                         $this->pricingTab(),
@@ -257,6 +268,48 @@ class HomepageSettings extends Page implements HasForms
                         self::imageUpload('content.description.package_image', 'Product image'),
                         self::imageUpload('content.description.icon_image', 'Overlay badge image'),
                     ]),
+            ]);
+    }
+
+    private function investorAccountTab(): Tab
+    {
+        return Tab::make('Investor account')
+            ->components([
+                Toggle::make('content.investor_account.enabled')
+                    ->label('Show investor account card')
+                    ->helperText('Shown beside the description, in place of the product images.')
+                    ->inline(false),
+                TextInput::make('content.investor_account.title')
+                    ->label('Title')
+                    ->required()
+                    ->maxLength(120)
+                    ->helperText('The last word is highlighted.'),
+                TextInput::make('content.investor_account.intro')
+                    ->label('Intro line')
+                    ->maxLength(300),
+                Repeater::make('content.investor_account.rows')
+                    ->label('Credentials')
+                    ->schema([
+                        Select::make('icon')
+                            ->options(self::INVESTOR_ICON_OPTIONS)
+                            ->required()
+                            ->native(false),
+                        TextInput::make('label')
+                            ->required()
+                            ->maxLength(60),
+                        TextInput::make('value')
+                            ->required()
+                            ->maxLength(120),
+                    ])
+                    ->columns(3)
+                    ->maxItems(8)
+                    ->reorderable()
+                    ->addActionLabel('Add credential')
+                    ->itemLabel(fn (array $state): ?string => $state['label'] ?? null),
+                TextInput::make('content.investor_account.tagline')
+                    ->label('Tagline')
+                    ->maxLength(120)
+                    ->helperText('Use | to separate the two halves.'),
             ]);
     }
 

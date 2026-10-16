@@ -34,6 +34,14 @@ export type DescriptionContent = {
     iconImage: string | null;
 };
 
+export type InvestorAccountContent = {
+    enabled: boolean;
+    title: string;
+    intro: string;
+    rows: { icon: string; label: string; value: string }[];
+    tagline: string;
+};
+
 export type ResultsContent = {
     source: string;
     heading: string;
@@ -88,6 +96,7 @@ export type HomepageContent = {
     hero: HeroContent;
     successKeys: SuccessKeysContent;
     description: DescriptionContent;
+    investorAccount: InvestorAccountContent;
     results: ResultsContent;
     whyChoose: WhyChooseContent;
     pricingBanner: PricingBannerContent;
@@ -176,7 +185,16 @@ export function SuccessKeys({ content }: { content: SuccessKeysContent }) {
 
 /* -------------------- Description -------------------- */
 
-export function Description({ content }: { content: DescriptionContent }) {
+export function Description({
+    content,
+    investorAccount,
+}: {
+    content: DescriptionContent;
+    investorAccount: InvestorAccountContent;
+}) {
+    const showInvestorAccount =
+        investorAccount.enabled && investorAccount.rows.length > 0;
+
     return (
         <section
             id="description"
@@ -226,34 +244,221 @@ export function Description({ content }: { content: DescriptionContent }) {
                 </Reveal>
 
                 <Reveal delay={120} direction="down">
-                    <div className="relative flex min-h-[520px] items-center justify-center">
-                        <div
-                            aria-hidden
-                            className="pointer-events-none absolute -inset-8 bg-[radial-gradient(closest-side,rgba(174,131,72,0.18),transparent_70%)] blur-2xl"
-                        />
-                        {content.packageImage ? (
-                            <img
-                                src={content.packageImage}
-                                alt="Tradivo Magic EA V12 product box"
-                                width={800}
-                                height={1100}
-                                className="relative h-auto w-full max-w-[420px] rounded-md shadow-[0_30px_60px_-30px_rgba(0,0,0,0.7)]"
+                    {showInvestorAccount ? (
+                        <InvestorAccountCard content={investorAccount} />
+                    ) : (
+                        <div className="relative flex min-h-[520px] items-center justify-center">
+                            <div
+                                aria-hidden
+                                className="pointer-events-none absolute -inset-8 bg-[radial-gradient(closest-side,rgba(174,131,72,0.18),transparent_70%)] blur-2xl"
                             />
-                        ) : null}
-                        {content.iconImage ? (
-                            <img
-                                src={content.iconImage}
-                                alt="Tradivo mark"
-                                width={475}
-                                height={358}
-                                className="absolute right-0 -bottom-6 h-auto w-[38%] max-w-[220px] rounded-md drop-shadow-[0_22px_28px_rgba(0,0,0,0.55)] sm:-right-4 md:-right-6"
-                            />
-                        ) : null}
-                    </div>
+                            {content.packageImage ? (
+                                <img
+                                    src={content.packageImage}
+                                    alt="Tradivo Magic EA V12 product box"
+                                    width={800}
+                                    height={1100}
+                                    className="relative h-auto w-full max-w-[420px] rounded-md shadow-[0_30px_60px_-30px_rgba(0,0,0,0.7)]"
+                                />
+                            ) : null}
+                            {content.iconImage ? (
+                                <img
+                                    src={content.iconImage}
+                                    alt="Tradivo mark"
+                                    width={475}
+                                    height={358}
+                                    className="absolute right-0 -bottom-6 h-auto w-[38%] max-w-[220px] rounded-md drop-shadow-[0_22px_28px_rgba(0,0,0,0.55)] sm:-right-4 md:-right-6"
+                                />
+                            ) : null}
+                        </div>
+                    )}
                 </Reveal>
             </div>
         </section>
     );
+}
+
+/* -------------------- Investor account -------------------- */
+
+function InvestorAccountCard({ content }: { content: InvestorAccountContent }) {
+    const words = content.title.split(' ');
+    const highlight = words.length > 1 ? words.pop() : null;
+    const [taglineLeft, taglineRight] = content.tagline
+        .split('|')
+        .map((part) => part.trim());
+
+    return (
+        <div className="relative">
+            <div
+                aria-hidden
+                className="pointer-events-none absolute -inset-6 bg-[radial-gradient(closest-side,rgba(132,214,58,0.16),transparent_70%)] blur-2xl"
+            />
+            <div className="relative rounded-2xl border border-[#84d63a]/70 bg-[#050a05]/90 p-5 shadow-[0_0_40px_-12px_rgba(132,214,58,0.55)] sm:p-7">
+                <div className="flex items-center gap-3">
+                    <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center text-[#84d63a]">
+                        <InvestorIcon name="investor" size={34} />
+                    </span>
+                    <h3 className="font-display text-[clamp(1.25rem,1.6vw+.6rem,1.9rem)] leading-tight font-extrabold tracking-wide text-white uppercase">
+                        {words.join(' ')}{' '}
+                        {highlight ? (
+                            <span className="text-[#84d63a]">{highlight}</span>
+                        ) : null}
+                    </h3>
+                </div>
+                {content.intro ? (
+                    <p className="mt-3 text-[14px] leading-relaxed text-white/85">
+                        {content.intro}
+                    </p>
+                ) : null}
+
+                <dl className="mt-5 divide-y divide-[#84d63a]/25 rounded-xl border border-[#84d63a]/50 px-4 sm:px-5">
+                    {content.rows.map((row, i) => (
+                        <InvestorRow key={i} row={row} />
+                    ))}
+                </dl>
+
+                {content.tagline ? (
+                    <div className="mt-5 flex items-center justify-center gap-3 text-[13px] text-white/85">
+                        <span
+                            aria-hidden
+                            className="hidden h-px flex-1 bg-[#84d63a]/60 sm:block"
+                        />
+                        <span className="text-[#84d63a]">
+                            <InvestorIcon name="shield" size={18} />
+                        </span>
+                        <span>{taglineLeft}</span>
+                        {taglineRight ? (
+                            <>
+                                <span aria-hidden className="text-white/50">
+                                    |
+                                </span>
+                                <span>{taglineRight}</span>
+                            </>
+                        ) : null}
+                        <span
+                            aria-hidden
+                            className="hidden h-px flex-1 bg-[#84d63a]/60 sm:block"
+                        />
+                    </div>
+                ) : null}
+            </div>
+        </div>
+    );
+}
+
+function InvestorRow({ row }: { row: InvestorAccountContent['rows'][number] }) {
+    const [copied, setCopied] = useState(false);
+
+    const copy = async () => {
+        try {
+            await navigator.clipboard.writeText(row.value);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 1500);
+        } catch {
+            setCopied(false);
+        }
+    };
+
+    return (
+        <div className="flex flex-col gap-2 py-3.5 sm:flex-row sm:items-center sm:gap-4">
+            <dt className="flex items-center gap-3 font-display text-[15px] font-semibold text-white sm:w-[45%]">
+                <span className="text-[#84d63a]">
+                    <InvestorIcon name={row.icon} size={22} />
+                </span>
+                {row.label}
+            </dt>
+            <dd className="flex flex-1 items-center justify-between gap-2 rounded-lg border border-white/15 bg-white/[0.04] py-2 pr-2 pl-4">
+                <span className="truncate font-display text-[15px] text-white select-all">
+                    {row.value}
+                </span>
+                <button
+                    type="button"
+                    onClick={copy}
+                    aria-label={`Copy ${row.label.replace(/:$/, '')}`}
+                    className="inline-flex h-8 shrink-0 items-center justify-center rounded-md px-2 text-[12px] text-[#84d63a] transition-colors hover:bg-[#84d63a]/10"
+                >
+                    {copied ? 'Copied' : <InvestorIcon name="copy" size={18} />}
+                </button>
+            </dd>
+        </div>
+    );
+}
+
+function InvestorIcon({ name, size }: { name: string; size: number }) {
+    const props = {
+        width: size,
+        height: size,
+        viewBox: '0 0 24 24',
+        fill: 'none',
+        stroke: 'currentColor',
+        strokeWidth: 1.8,
+        strokeLinecap: 'round' as const,
+        strokeLinejoin: 'round' as const,
+        'aria-hidden': true,
+    };
+
+    switch (name) {
+        case 'server':
+            return (
+                <svg {...props}>
+                    <rect x="3" y="3" width="18" height="7" rx="1.5" />
+                    <rect x="3" y="14" width="18" height="7" rx="1.5" />
+                    <path d="M7 6.5h.01M7 17.5h.01M11 6.5h6M11 17.5h6" />
+                </svg>
+            );
+        case 'lock':
+            return (
+                <svg {...props}>
+                    <rect x="4" y="10" width="16" height="11" rx="2" />
+                    <path d="M8 10V7a4 4 0 0 1 8 0v3M12 14.5v3" />
+                </svg>
+            );
+        case 'key':
+            return (
+                <svg {...props}>
+                    <circle cx="8" cy="15" r="4" />
+                    <path d="m10.8 12.2 8.7-8.7M16 7l2.5 2.5M18.5 4.5 21 7" />
+                </svg>
+            );
+        case 'globe':
+            return (
+                <svg {...props}>
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" />
+                </svg>
+            );
+        case 'copy':
+            return (
+                <svg {...props}>
+                    <rect x="8" y="8" width="12" height="12" rx="2" />
+                    <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" />
+                </svg>
+            );
+        case 'shield':
+            return (
+                <svg {...props}>
+                    <path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.4 7.5 9.5 4.3-1.1 7.5-4.9 7.5-9.5V6L12 3z" />
+                    <path d="m9 12 2 2 4-4" />
+                </svg>
+            );
+        case 'investor':
+            return (
+                <svg {...props}>
+                    <circle cx="9" cy="7" r="3.5" />
+                    <path d="M2.5 20a6.5 6.5 0 0 1 11.2-4.5" />
+                    <circle cx="17.5" cy="16.5" r="4" />
+                    <circle cx="17.5" cy="16.5" r="1.2" />
+                    <path d="m20 14 2-2" />
+                </svg>
+            );
+        default:
+            return (
+                <svg {...props}>
+                    <circle cx="12" cy="8" r="4" />
+                    <path d="M4 21a8 8 0 0 1 16 0" />
+                </svg>
+            );
+    }
 }
 
 /* -------------------- Results -------------------- */

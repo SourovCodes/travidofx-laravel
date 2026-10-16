@@ -81,6 +81,19 @@ MD,
         'icon_image' => '/img/tradivo-icon.jpeg',
     ],
 
+    'investor_account' => [
+        // Replaces the product images in the description section when enabled.
+        'enabled' => true,
+        'title' => 'Investor Account Information',
+        'intro' => 'Use the following MT5 credentials to access the investor account:',
+        'rows' => [
+            ['icon' => 'server', 'label' => 'Server Name:', 'value' => 'Tradivo-Server'],
+            ['icon' => 'user', 'label' => 'MT5 ID:', 'value' => '12345678'],
+            ['icon' => 'lock', 'label' => 'Investor Password:', 'value' => 'Investor@2025'],
+        ],
+        'tagline' => 'Trade Smart | Trade with Tradivo',
+    ],
+
     'results' => [
         'source' => 'Verified Performance Statistics By Myfxbook V3.9',
         'heading' => 'Unlock the Full Power of Automated Trading with Tradivo',
