@@ -513,7 +513,7 @@ class Setting extends Model
         $key = $page->domainsSettingKey();
 
         return self::normalizeDomains(self::get($key) === null
-            ? config("{$page->configKey()}.domains", [])
+            ? $page->defaultDomains()
             : self::getArray($key));
     }
 
@@ -585,13 +585,14 @@ class Setting extends Model
     }
 
     /**
-     * Landing page 3 (contact) content resolved for the public page. Text keeps its **highlight** markers.
+     * Contact landing page content (landing page 3 or its copy) resolved for the public page.
+     * Text keeps its **highlight** markers.
      *
      * @return array<string, mixed>
      */
-    public static function contactLandingContent(): array
+    public static function contactLandingContent(LandingPage $page = LandingPage::Contact): array
     {
-        $content = self::landingPageContentState(LandingPage::Contact);
+        $content = self::landingPageContentState($page);
         $text = fn (string $section, string $key): string => trim((string) ($content[$section][$key] ?? ''));
         $optional = fn (mixed $value): ?string => ($value = trim((string) $value)) !== '' ? $value : null;
         $image = fn (string $section, string $key): ?string => self::homepageImageUrl($content[$section][$key] ?? null);

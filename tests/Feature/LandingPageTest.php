@@ -3,6 +3,7 @@
 use App\Enums\LandingPage;
 use App\Filament\Pages\ContactLandingPageSettings;
 use App\Filament\Pages\ProductsLandingPageSettings;
+use App\Filament\Pages\SecondContactLandingPageSettings;
 use App\Models\Setting;
 use Filament\Forms\Components\Repeater;
 use Livewire\Livewire;
@@ -126,6 +127,30 @@ test('admin can manage products landing domains and content', function () {
         ->and($content['whyChoose']['items'])->toBe(['Fast setup'])
         ->and($content['pricing']['showPlans'])->toBeFalse()
         ->and($content['cta']['buttonUrl'])->toBe('#pricing');
+});
+
+test('landing page 4 is a separately managed copy of the contact landing page', function () {
+    expect(Setting::landingPageDomains(LandingPage::SecondContact))->toBe([]);
+
+    Livewire::test(SecondContactLandingPageSettings::class)
+        ->assertSet('data.content.hero.title', "Trade Smarter\nwith **Profit Shield EA**")
+        ->fillForm([
+            'domains' => ['contact.tradivofx.com'],
+            'content.hero.title' => 'Contact team **two**',
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    $this->get('http://contact.tradivofx.com/')
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('landing/contact')
+            ->where('content.hero.title', 'Contact team **two**'));
+
+    $this->get('http://info.tradivofx.com/')
+        ->assertInertia(fn ($page) => $page
+            ->component('landing/contact')
+            ->where('content.hero.title', "Trade Smarter\nwith **Profit Shield EA**"));
 });
 
 test('admin cannot use an invalid domain, the main website domain, or another landing page domain', function (string $domain) {

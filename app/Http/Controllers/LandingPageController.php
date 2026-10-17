@@ -11,9 +11,9 @@ class LandingPageController extends Controller
 {
     public function show(LandingPage $page): Response
     {
-        return Inertia::render($page->component(), match ($page) {
+        return Inertia::render($page->component(), match ($page->template()) {
             LandingPage::Products => $this->productsProps(),
-            LandingPage::Contact => ['content' => Setting::contactLandingContent()],
+            LandingPage::Contact => ['content' => Setting::contactLandingContent($page)],
         });
     }
 
