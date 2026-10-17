@@ -44,6 +44,7 @@ class HandleInertiaRequests extends Middleware
             ],
             'contact' => fn () => Setting::contactLinks(),
             'socialLinks' => fn () => Setting::socialLinks(),
+            'footer' => fn () => Setting::footerContent(),
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),

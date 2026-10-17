@@ -122,6 +122,7 @@ class HomepageSettings extends Page implements HasForms
                         $this->galleryTab(),
                         $this->faqTab(),
                         $this->testimonialsAndContactTab(),
+                        $this->footerTab(),
                     ]),
             ])
             ->statePath('data');
@@ -556,6 +557,29 @@ class HomepageSettings extends Page implements HasForms
                             ->rows(3)
                             ->maxLength(600),
                     ]),
+            ]);
+    }
+
+    private function footerTab(): Tab
+    {
+        return Tab::make('Footer')
+            ->components([
+                TextInput::make('content.footer.payments_heading')
+                    ->label('Payment methods heading')
+                    ->maxLength(120)
+                    ->helperText('Leave blank to hide the heading.'),
+                TextInput::make('content.footer.heading')
+                    ->label('Heading')
+                    ->maxLength(120),
+                Textarea::make('content.footer.body')
+                    ->label('Text')
+                    ->rows(4)
+                    ->maxLength(1000),
+                TextInput::make('content.footer.email')
+                    ->label('Contact email')
+                    ->email()
+                    ->maxLength(160)
+                    ->helperText('Shown in the bottom line next to the copyright. Leave blank to hide it.'),
             ]);
     }
 

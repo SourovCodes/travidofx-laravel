@@ -53,16 +53,18 @@ function SocialIcon({ platform }: { platform: string }) {
 }
 
 export default function Footer() {
-    const { socialLinks } = usePage().props;
+    const { socialLinks, footer } = usePage().props;
 
     return (
         <>
             <section className="relative bg-black pt-14 pb-10">
-                <div className="container-x text-center">
-                    <h3 className="font-display text-[1.5rem] font-medium text-white md:text-[1.8rem]">
-                        We accept payment methods
-                    </h3>
-                </div>
+                {footer.paymentsHeading !== '' && (
+                    <div className="container-x text-center">
+                        <h3 className="font-display text-[1.5rem] font-medium text-white md:text-[1.8rem]">
+                            {footer.paymentsHeading}
+                        </h3>
+                    </div>
+                )}
 
                 <div className="container-x mt-10">
                     <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-8">
@@ -82,22 +84,21 @@ export default function Footer() {
 
             <section className="relative bg-black pt-12 pb-14">
                 <div className="container-x mx-auto max-w-3xl text-center">
-                    <h2 className="font-display text-[clamp(1.8rem,2.4vw+.8rem,2.6rem)] font-medium">
-                        <Link
-                            href="/"
-                            className="text-white transition-colors hover:text-shape"
-                        >
-                            Tradivofx.com
-                        </Link>
-                    </h2>
-                    <p className="mt-5 text-[15px] leading-[1.75] text-white/80">
-                        Discover the edge in automated trading with Tradivo
-                        Magic EA V12 — an advanced Gold Expert Advisor for MT5.
-                        HTF trend filtering, counter-trend grid execution,
-                        recovery protection, and smart basket profit targeting
-                        in one disciplined algorithmic system. Powered by
-                        Tradivo FX Limited.
-                    </p>
+                    {footer.heading !== '' && (
+                        <h2 className="font-display text-[clamp(1.8rem,2.4vw+.8rem,2.6rem)] font-medium">
+                            <Link
+                                href="/"
+                                className="text-white transition-colors hover:text-shape"
+                            >
+                                {footer.heading}
+                            </Link>
+                        </h2>
+                    )}
+                    {footer.body !== '' && (
+                        <p className="mt-5 text-[15px] leading-[1.75] whitespace-pre-line text-white/80">
+                            {footer.body}
+                        </p>
+                    )}
 
                     <div className="mt-10 flex justify-center">
                         <img
@@ -139,14 +140,18 @@ export default function Footer() {
                 }}
             >
                 <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
-                    <a
-                        href="mailto:info@tradivofx.com"
-                        style={{ color: 'white' }}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        © Tradivo FX Limited · info@tradivofx.com
-                    </a>
+                    {footer.email !== '' ? (
+                        <a
+                            href={`mailto:${footer.email}`}
+                            style={{ color: 'white' }}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            © Tradivo FX Limited · {footer.email}
+                        </a>
+                    ) : (
+                        <span>© Tradivo FX Limited</span>
+                    )}
                     <span aria-hidden className="text-white/45">
                         ·
                     </span>

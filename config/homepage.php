@@ -168,4 +168,11 @@ MD,
         'cta_heading' => 'Ready to Automate Your Gold Trading?',
         'cta_body' => 'Discover what Tradivo Magic EA V12 can do for your trading. Our team is ready to help you set up, fine-tune, and get the most out of every basket cycle.',
     ],
+
+    'footer' => [
+        'payments_heading' => 'We accept payment methods',
+        'heading' => 'Tradivofx.com',
+        'body' => 'Discover the edge in automated trading with Tradivo Magic EA V12 — an advanced Gold Expert Advisor for MT5. HTF trend filtering, counter-trend grid execution, recovery protection, and smart basket profit targeting in one disciplined algorithmic system. Powered by Tradivo FX Limited.',
+        'email' => 'info@tradivofx.com',
+    ],
 ];

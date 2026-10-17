@@ -1,5 +1,5 @@
 import type { Auth } from '@/types/auth';
-import type { ContactLinks, SocialLink } from '@/types/contact';
+import type { ContactLinks, FooterContent, SocialLink } from '@/types/contact';
 
 declare module '@inertiajs/core' {
     export interface InertiaConfig {
@@ -8,6 +8,7 @@ declare module '@inertiajs/core' {
             auth: Auth;
             contact: ContactLinks;
             socialLinks: SocialLink[];
+            footer: FooterContent;
             sidebarOpen: boolean;
             [key: string]: unknown;
         };

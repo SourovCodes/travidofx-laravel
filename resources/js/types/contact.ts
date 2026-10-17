@@ -15,3 +15,10 @@ export type SocialLink = {
     label: string;
     url: string;
 };
+
+export type FooterContent = {
+    paymentsHeading: string;
+    heading: string;
+    body: string;
+    email: string;
+};

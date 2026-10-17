@@ -800,7 +800,7 @@ function GalleryCard({ item }: { item: GalleryItem }) {
                         src={item.image}
                         alt={item.title}
                         loading="lazy"
-                        className="h-full w-full object-cover"
+                        className="h-full w-full object-contain"
                     />
                 ) : null}
             </div>

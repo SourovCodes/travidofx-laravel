@@ -766,6 +766,24 @@ class Setting extends Model
     }
 
     /**
+     * Site footer text shared by every main website page.
+     *
+     * @return array{paymentsHeading: string, heading: string, body: string, email: string}
+     */
+    public static function footerContent(): array
+    {
+        $footer = self::homepageContentState()['footer'] ?? [];
+        $text = fn (string $key): string => trim((string) ($footer[$key] ?? ''));
+
+        return [
+            'paymentsHeading' => $text('payments_heading'),
+            'heading' => $text('heading'),
+            'body' => $text('body'),
+            'email' => $text('email'),
+        ];
+    }
+
+    /**
      * Resolve an uploaded file path (or bundled /img path) to a public URL.
      */
     public static function homepageImageUrl(mixed $path, mixed $default = null): ?string

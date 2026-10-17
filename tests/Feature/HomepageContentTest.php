@@ -95,3 +95,31 @@ test('homepage markdown fields strip raw html', function () {
         ->and($content['pricingBanner']['intro'])->toContain('<strong>Instant</strong> access')
         ->and($content['pricingBanner']['heading'])->toBe('Get Instant Access to Tradivo Magic EA V12');
 });
+
+test('admin can edit the site footer text shown on every page', function () {
+    expect($this->get(route('home'))->inertiaProps('footer'))->toBe([
+        'paymentsHeading' => 'We accept payment methods',
+        'heading' => 'Tradivofx.com',
+        'body' => config('homepage.footer.body'),
+        'email' => 'info@tradivofx.com',
+    ]);
+
+    $undoRepeaterFake = Repeater::fake();
+
+    Livewire::test(HomepageSettings::class)
+        ->fillForm([
+            'content.footer.heading' => 'Tradivo FX',
+            'content.footer.body' => 'Gold automation for MT5.',
+            'content.footer.email' => 'support@tradivofx.com',
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    $undoRepeaterFake();
+
+    expect($this->get(route('privacy-policy'))->inertiaProps('footer'))->toMatchArray([
+        'heading' => 'Tradivo FX',
+        'body' => 'Gold automation for MT5.',
+        'email' => 'support@tradivofx.com',
+    ]);
+});

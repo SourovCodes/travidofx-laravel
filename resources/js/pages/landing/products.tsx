@@ -1,6 +1,7 @@
 import { Head, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import Faq from '@/components/Faq';
+import FloatingContactButtons from '@/components/FloatingContactButtons';
 import HighlightedText from '@/components/HighlightedText';
 import LandingIcon from '@/components/LandingIcon';
 import Pricing from '@/components/Pricing';
@@ -143,6 +144,7 @@ export default function ProductsLanding({
             </main>
 
             <LandingFooter mainSiteUrl={mainSiteUrl} />
+            <FloatingContactButtons />
         </>
     );
 }
