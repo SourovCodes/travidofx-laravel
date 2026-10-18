@@ -778,10 +778,14 @@ export function ProductGallery({
 
                 <div
                     role="tabpanel"
-                    className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+                    className="mt-10 flex flex-wrap justify-center gap-6"
                 >
                     {groups[activeKey].map((item, i) => (
-                        <Reveal key={item.id} delay={(i % 3) * 90}>
+                        <Reveal
+                            key={item.id}
+                            delay={(i % 3) * 90}
+                            className="w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc((100%-3rem)/3)]"
+                        >
                             <GalleryCard item={item} />
                         </Reveal>
                     ))}
