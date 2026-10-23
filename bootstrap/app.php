@@ -16,9 +16,11 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->prepend(RedirectLandingDomainToMainSite::class);
 
+        // LiteSpeed returns a bare 500 when response headers pass ~8 KB, and the
+        // pages preload 100+ assets. The HTML still preloads all of them.
         $middleware->web(append: [
             HandleInertiaRequests::class,
-            AddLinkHeadersForPreloadedAssets::class,
+            AddLinkHeadersForPreloadedAssets::using(20),
         ]);
 
         $middleware->preventRequestForgery(except: [
